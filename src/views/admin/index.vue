@@ -40,19 +40,23 @@ import {login, getUserInfo} from '@/api/login'
             login(this.form.username, this.form.password).then(res => {
               const resp = res.data;
               console.log(res);
-              
+              this.$message({
+                message: resp.message,
+                type: 'success'
+              });
               if(resp.flag) {
                 // 验证成功
                 getUserInfo(resp.data.token).then(res => {
                   const respUser = res.data
                   if(respUser.flag) {
+                    
                     // 获取到用户信息
                     console.log(res.data);
                     // 1. 保存token ,用户信息
                     localStorage.setItem("mxg-msm-user", JSON.stringify(respUser.data))
                     localStorage.setItem("mxg-msm-token", resp.data.token)
                     // 2. 前往首页
-                    this.$router.push('/')
+                    this.$router.push('/home')
                   } else {
                     this.$message({
                       message: respUser.message,
@@ -97,4 +101,4 @@ import {login, getUserInfo} from '@/api/login'
   padding: 30px;
   border-radius: 20px;
 }
-</style>
+</style>-
