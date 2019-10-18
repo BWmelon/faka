@@ -53,8 +53,8 @@ import {login, getUserInfo} from '@/api/login'
                     // 获取到用户信息
                     console.log(res.data);
                     // 1. 保存token ,用户信息
-                    localStorage.setItem("mxg-msm-user", JSON.stringify(respUser.data))
-                    localStorage.setItem("mxg-msm-token", resp.data.token)
+                    localStorage.setItem("faka-user", JSON.stringify(respUser.data))
+                    localStorage.setItem("faka-token", resp.data.token)
                     // 2. 前往首页
                     this.$router.push('/home')
                   } else {

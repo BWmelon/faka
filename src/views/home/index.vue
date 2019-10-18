@@ -1,6 +1,6 @@
 <template>
-    <div class="main">
-        <router-view></router-view>
+    <div>
+        home页面
     </div>
 </template>
 

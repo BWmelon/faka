@@ -1,20 +1,20 @@
 <template>
   <div class="navbar">
     <el-menu
-      default-active="1"
-      class="el-menu-vertical-demo"
+      default-active="/home"
       @open="handleOpen"
       @close="handleClose"
       background-color="#000"
       text-color="#fff"
       active-text-color="#ffd04b"
       :router="true"
+      style="border: 0;"
     >
       <el-menu-item index="/home">
         <i class="el-icon-setting"></i>
         <span slot="title">控制面板</span>
       </el-menu-item>
-      <el-submenu>
+      <el-submenu index="1">
         <template slot="title">
           <i class="el-icon-location"></i>
           <span>商品管理</span>
@@ -23,7 +23,7 @@
           <el-menu-item index="/goodsList">商品管理</el-menu-item>
           <el-menu-item index="/goodsCard">卡密管理</el-menu-item>
       </el-submenu>
-      <el-submenu>
+      <el-submenu index="2">
         <template slot="title">
           <i class="el-icon-location"></i>
           <span>交易管理</span>
@@ -33,7 +33,7 @@
           <el-menu-item index="/saleEarning">收益统计</el-menu-item>
           <el-menu-item index="/payRate">支付费率</el-menu-item>
       </el-submenu>
-      <el-submenu>
+      <el-submenu index="3">
         <template slot="title">
           <i class="el-icon-location"></i>
           <span>商家助手</span>
