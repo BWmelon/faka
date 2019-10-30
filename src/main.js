@@ -5,6 +5,9 @@ import App from "./App.vue";
 import router from "./router";
 
 Vue.use(ElementUI);
+
+import './permission.js'
+
 Vue.config.productionTip = process.env.NODE_ENV === 'production';
 console.log(process.env.NODE_ENV); // 开发环境 development ， 生产环境 production
 console.log(process.env.VUE_APP_SERVICE_URL); 
