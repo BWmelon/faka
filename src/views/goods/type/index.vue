@@ -1,5 +1,6 @@
 <template>
   <div>
+    <el-button type="primary" icon="el-icon-plus" @click="dialogFormVisible = true">新增</el-button>
     <el-table :data="goodsTypeList" height="700" border style="width: 100%">
       <el-table-column type="index" label="序号"></el-table-column>
       <el-table-column prop="typeName" label="分类名称" width="300"></el-table-column>
@@ -33,14 +34,29 @@
       :page-sizes="[10, 20]"
       :page-size="10"
       layout="total, sizes, prev, pager, next, jumper"
-      :total=total
+      :total="total"
     ></el-pagination>
+    <!-- 弹出新增商品分类窗口 -->
+    <el-dialog title="新增商品分类" :visible.sync="dialogFormVisible">
+      <el-form :model="goodsTypeForm" :rules="rules">
+        <el-form-item label="分类名称" :label-width="formLabelWidth" prop="name">
+          <el-input v-model="goodsTypeForm.name" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="分类排序" :label-width="formLabelWidth" prop="sort">
+          <el-input v-model="goodsTypeForm.sort" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import goodsTypeApi from "@/api/goodsType";
-import { log } from 'util';
+import { log } from "util";
 // 商品分类上架状态
 const statusOptions = [
   { type: 0, name: "已下架" },
@@ -55,25 +71,45 @@ export default {
       goodsTypeList: [],
       total: 0,
       currentPage: 1,
-      pageSize: 10
+      pageSize: 10,
+      dialogFormVisible: false,
+      goodsTypeForm: {
+        name: "",
+        sort: 1
+      },
+      formLabelWidth: "120px",
+      rules: {
+        name: [
+          { required: true, message: "请输入商品分类名称", trigger: "blur" }
+        ],
+        sort: [
+          {
+            type: "number",
+            min: 1,
+            required: true,
+            message: "请输入商品分类排序，排序应大于1",
+            trigger: "blur"
+          }
+        ]
+      }
     };
   },
   methods: {
-    handleSizeChange(size){
-        this.pageSize = size
-        this.fetchData()
+    handleSizeChange(size) {
+      this.pageSize = size;
+      this.fetchData();
     },
     handleCurrentChange(current) {
-      this.currentPage = current
-      this.fetchData()
+      this.currentPage = current;
+      this.fetchData();
     },
     fetchData() {
       // goodsTypeApi.getGoodsTypeList().then(res => {
       goodsTypeApi.getPagination(this.currentPage, this.pageSize).then(res => {
         const resp = res.data;
         if (resp.flag) {
-          this.total = resp.data.total
-          this.goodsTypeList = resp.data.rows
+          this.total = resp.data.total;
+          this.goodsTypeList = resp.data.rows;
         }
       });
     },
@@ -98,6 +134,19 @@ export default {
     },
     handleDelete(row) {
       console.log(row);
+    },
+    submitForm(formName) {
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          alert("submit!");
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
+      });
+    },
+    resetForm(formName) {
+      this.$refs[formName].resetFields();
     }
   },
   filters: {
