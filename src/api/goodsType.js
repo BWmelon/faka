@@ -36,6 +36,11 @@ export default {
             method: 'put',
             data
         })
+    },
+    delete(id) {
+        return request({
+            url: `/goods/type/${id}`,
+            method: 'delete'
+        })
     }
-
 }

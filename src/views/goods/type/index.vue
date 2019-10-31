@@ -48,7 +48,10 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="goodsTypeForm.id ? updateGoodsType('addGoodsTypeForm') : addGoodsType('addGoodsTypeForm')">确 定</el-button>
+        <el-button
+          type="primary"
+          @click="goodsTypeForm.id ? updateGoodsType('addGoodsTypeForm') : addGoodsType('addGoodsTypeForm')"
+        >确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -128,19 +131,45 @@ export default {
       const property = column["property"];
       return row[property] === value;
     },
-    handleEdit(id) { 
+    handleEdit(id) {
       goodsTypeApi.getById(id).then(res => {
         const resp = res.data;
         this.handleAdd();
         if (resp.flag) {
-            this.$nextTick(() => {
-              this.goodsTypeForm = resp.data;
-            })         
+          this.$nextTick(() => {
+            this.goodsTypeForm = resp.data;
+          });
         }
       });
     },
     handleDelete(id) {
-      console.log(row);
+      this.$confirm("此操作将永久删除该分类, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          goodsTypeApi.delete(id).then(res => {
+            const resp = res.data;
+            if (resp.flag) {
+              this.$message({
+                type: "success",
+                message: resp.message
+              });
+            } else {
+              this.$message({
+                type: "error",
+                message: resp.message
+              });
+            }
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除"
+          });
+        });
     },
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
@@ -178,27 +207,26 @@ export default {
     },
     updateGoodsType(formName) {
       this.$refs[formName].validate(valid => {
-        if(valid) {
+        if (valid) {
           goodsTypeApi.update(this.goodsTypeForm).then(res => {
-            const resp = res.data
-            if(resp.flag) {
+            const resp = res.data;
+            if (resp.flag) {
               this.$message({
                 message: resp.message,
-                type: 'success'
-              })
-              this.fetchData()
-              this.dialogFormVisible = false
+                type: "success"
+              });
+              this.fetchData();
+              this.dialogFormVisible = false;
             } else {
               this.$message({
                 message: resp.message,
-                type: 'error'
-              })
-              this.dialogFormVisible = false
+                type: "error"
+              });
+              this.dialogFormVisible = false;
             }
-          })
+          });
         }
-      })
-      
+      });
     },
     // 弹出新增窗口
     handleAdd() {
