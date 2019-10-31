@@ -21,6 +21,21 @@ export default {
             method: 'post',
             data
         })
+    },
+    // 获取商品分类信息
+    getById(id) {
+        return request({
+            url: `/goods/type/${id}`,
+            method: 'get'
+        })
+    },
+    // 修改商品分类信息
+    update(data) {
+        return request({
+            url: `/goods/type/${data.id}`,
+            method: 'put',
+            data
+        })
     }
 
 }

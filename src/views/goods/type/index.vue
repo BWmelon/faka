@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-button type="primary" icon="el-icon-plus" @click="handleAdd('addGoodsTypeForm')">新增</el-button>
+    <el-button type="primary" icon="el-icon-plus" @click="handleAdd">新增</el-button>
     <el-table :data="goodsTypeList" height="700" border style="width: 100%">
       <el-table-column type="index" label="序号"></el-table-column>
       <el-table-column prop="typeName" label="分类名称" width="300"></el-table-column>
@@ -37,10 +37,10 @@
       :total="total"
     ></el-pagination>
     <!-- 弹出新增商品分类窗口 -->
-    <el-dialog title="新增商品分类" :visible.sync="dialogFormVisible">
+    <el-dialog title="商品分类编辑" :visible.sync="dialogFormVisible">
       <el-form :model="goodsTypeForm" :rules="rules" ref="addGoodsTypeForm">
-        <el-form-item label="分类名称" :label-width="formLabelWidth" prop="name">
-          <el-input v-model="goodsTypeForm.name" autocomplete="off"></el-input>
+        <el-form-item label="分类名称" :label-width="formLabelWidth" prop="typeName">
+          <el-input v-model="goodsTypeForm.typeName" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="分类排序" :label-width="formLabelWidth" prop="sort">
           <el-input v-model="goodsTypeForm.sort" autocomplete="off"></el-input>
@@ -48,7 +48,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addGoodsType('addGoodsTypeForm')">确 定</el-button>
+        <el-button type="primary" @click="goodsTypeForm.id ? updateGoodsType('addGoodsTypeForm') : addGoodsType('addGoodsTypeForm')">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -73,12 +73,14 @@ export default {
       pageSize: 10,
       dialogFormVisible: false,
       goodsTypeForm: {
-        name: "",
+        id: null,
+        typeName: "",
+        status: null,
         sort: 1
       },
       formLabelWidth: "120px",
       rules: {
-        name: [
+        typeName: [
           { required: true, message: "请输入商品分类名称", trigger: "blur" }
         ],
         sort: [
@@ -126,10 +128,18 @@ export default {
       const property = column["property"];
       return row[property] === value;
     },
-    handleEdit(row) {
-      console.log(row);
+    handleEdit(id) { 
+      goodsTypeApi.getById(id).then(res => {
+        const resp = res.data;
+        this.handleAdd();
+        if (resp.flag) {
+            this.$nextTick(() => {
+              this.goodsTypeForm = resp.data;
+            })         
+        }
+      });
     },
-    handleDelete(row) {
+    handleDelete(id) {
       console.log(row);
     },
     submitForm(formName) {
@@ -144,35 +154,59 @@ export default {
     },
     addGoodsType(formName) {
       this.$refs[formName].validate(valid => {
-        if(valid) {
+        if (valid) {
           goodsTypeApi.addGoodsType(this.goodsTypeForm).then(res => {
+            const resp = res.data;
+            if (resp.flag) {
+              this.$message({
+                message: resp.message,
+                type: "success"
+              });
+              this.dialogFormVisible = false;
+              this.fetchData();
+            } else {
+              this.$message({
+                message: resp.message,
+                type: "warning"
+              });
+            }
+          });
+        } else {
+          return false;
+        }
+      });
+    },
+    updateGoodsType(formName) {
+      this.$refs[formName].validate(valid => {
+        if(valid) {
+          goodsTypeApi.update(this.goodsTypeForm).then(res => {
             const resp = res.data
             if(resp.flag) {
               this.$message({
                 message: resp.message,
                 type: 'success'
               })
-              this.dialogFormVisible = false
               this.fetchData()
+              this.dialogFormVisible = false
             } else {
               this.$message({
                 message: resp.message,
-                type: 'warning'
+                type: 'error'
               })
+              this.dialogFormVisible = false
             }
-          })          
-        } else {
-          return false
+          })
         }
       })
+      
     },
     // 弹出新增窗口
-    handleAdd(formName) {
-      this.dialogFormVisible = true
+    handleAdd() {
+      this.dialogFormVisible = true;
       this.$nextTick(() => {
-        this.$refs[formName].resetFields();
-        this.$refs[formName].clearValidate();
-      })
+        this.$refs["addGoodsTypeForm"].resetFields();
+        this.$refs["addGoodsTypeForm"].clearValidate();
+      });
     }
   },
   filters: {
