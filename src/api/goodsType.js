@@ -13,6 +13,14 @@ export default {
             url: `/goods/type/${page}/${size}`,
             method: 'get'
         })
+    },
+    // 新增商品分类
+    addGoodsType(data) {
+        return request({
+            url: '/goods/type',
+            method: 'post',
+            data
+        })
     }
 
 }
