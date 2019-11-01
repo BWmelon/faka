@@ -143,7 +143,7 @@ export default {
       });
     },
     handleDelete(id) {
-      this.$confirm("此操作将永久删除该分类, 是否继续?", "提示", {
+      this.$confirm("删除分类后，改分类下的商品均被删除，确定要删除该分类?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
@@ -156,6 +156,7 @@ export default {
                 type: "success",
                 message: resp.message
               });
+              this.fetchData()
             } else {
               this.$message({
                 type: "error",
