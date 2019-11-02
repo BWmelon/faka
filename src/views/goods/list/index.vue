@@ -42,9 +42,9 @@
     <!-- talel结束 -->
     <!-- dialog开始 -->
     <el-dialog title="商品编辑" :visible.sync="dialogFormVisible">
-      <el-form :model="goodsListForm" ref="addGoodsListForm">
+      <el-form :model="goodsListForm" ref="addGoodsListForm" :rules="rules">
         <el-row>
-          <el-form-item label="活动区域" :label-width="formLabelWidth">
+          <el-form-item label="活动区域" :label-width="formLabelWidth" prop="typeName">
             <el-col :span="14">
               <el-select v-model="goodsListForm.typeName" placeholder="请选择商品分类">
                 <el-option
@@ -93,7 +93,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+        <el-button type="primary" @click="addGoodsList">确 定</el-button>
       </div>
     </el-dialog>
     <!-- dialog结束 -->
@@ -123,21 +123,32 @@ export default {
     return {
       goodsList: [],
       goodsListForm: {
-        id: null,
         goodsName: null,
         typeName: null,
         sort: 1,
-        status: 0,
         price: null,
-        stock: null,
-        sock: null
       },
       goodsTypes: [], //商品分类，用于添加或者修改商品信息时选择商品分类
       currentPage: 1,
       pageSize: 10,
       total: 0,
       dialogFormVisible: false,
-      formLabelWidth: "120px"
+      formLabelWidth: "120px",
+      rules: {
+        typeName: [
+          { required: true, message: '请选择商品分类', trigger: 'change' }
+        ],
+        goodsName: [
+          { required: true, message: '请输入商品名称', trigger: 'blur' },
+          { min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'blur' }
+        ],
+        sort: [
+          { required: true, message: '请输入商品名称', trigger: 'blur' }
+        ],
+        price: [
+          { required: true, message: '请输入商品价格', trigger: 'blur' }
+        ]
+      }
     };
   },
   filters: {
@@ -175,7 +186,7 @@ export default {
     },
     handleAddGoodsList() {
       this.getGoodsType();
-      this.dialogFormVisible = true;
+      this.handleAdd()
     },
     // 获取商品分类，将取得的值赋值给goodsTypes
     getGoodsType() {
@@ -193,6 +204,39 @@ export default {
           }
         }
       });
+    },
+    // 弹出新增窗口
+    handleAdd() {
+      this.dialogFormVisible = true;
+      this.$nextTick(() => {
+        this.$refs["addGoodsListForm"].resetFields();
+        this.$refs["addGoodsListForm"].clearValidate();
+      });
+    },
+    addGoodsList() {
+      this.$refs['addGoodsListForm'].validate(valid => {
+        if(valid) {
+          goodsListApi.addGoodsList(this.goodsListForm).then(res => {
+            const resp = res.data
+            if(resp.flag) {
+              this.$message({
+                message: resp.message,
+                type: 'success'
+              })
+              this.fetchData()
+              this.dialogFormVisible = false
+            } else {
+              this.$message({
+                message: resp.message,
+                type: 'error'
+              }),
+              this.dialogFormVisible = false
+            }
+          })
+        } else {
+          return false
+        }
+      })
     },
     handleEdit(index, row) {
       console.log(index, row);
