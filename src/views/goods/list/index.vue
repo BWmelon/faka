@@ -33,7 +33,7 @@
             @click="handleEdit(scope.$index, scope.row)"
             :type="scope.row.status === 1 ? 'primary' : 'success'"
           >{{ scope.row.status === 1 ? '下架' : '上架' }}</el-button>
-          <el-button size="mini" @click="handleEdit(scope.$index, scope.row)" type="primary">编辑</el-button>
+          <el-button size="mini" @click="handleEdit(scope.row.id)" type="primary">编辑</el-button>
           <el-button size="mini" @click="handleEdit(scope.$index, scope.row)" type="info">加卡</el-button>
           <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
@@ -46,12 +46,13 @@
         <el-row>
           <el-form-item label="活动区域" :label-width="formLabelWidth" prop="typeName">
             <el-col :span="14">
-              <el-select v-model="goodsListForm.typeName" placeholder="请选择商品分类">
+              <!-- <el-select v-model="goodsListForm.typeName" :value="nowTypeName" placeholder="请选择商品分类"> -->
+              <el-select v-model="nowTypeName" placeholder="请选择商品分类">
                 <el-option
                   v-for="item in goodsTypes"
                   :label="item.typeName"
                   :value="item.value"
-                  :key="item.value"
+                  :key="item.id"
                 ></el-option>
               </el-select>
             </el-col>
@@ -93,7 +94,11 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addGoodsList">确 定</el-button>
+        <!-- <el-button type="primary" @click="test">确 定</el-button> -->
+        <el-button
+          type="primary"
+          @click="goodsListForm.id === null ? addGoodsList() : updateById()"
+        >确 定</el-button>
       </div>
     </el-dialog>
     <!-- dialog结束 -->
@@ -123,12 +128,14 @@ export default {
     return {
       goodsList: [],
       goodsListForm: {
+        id: null,
         goodsName: null,
         typeName: null,
         sort: 1,
-        price: null,
+        price: null
       },
       goodsTypes: [], //商品分类，用于添加或者修改商品信息时选择商品分类
+      nowTypeName: null, //根据id
       currentPage: 1,
       pageSize: 10,
       total: 0,
@@ -136,18 +143,14 @@ export default {
       formLabelWidth: "120px",
       rules: {
         typeName: [
-          { required: true, message: '请选择商品分类', trigger: 'change' }
+          { required: true, message: "请选择商品分类", trigger: "change" }
         ],
         goodsName: [
-          { required: true, message: '请输入商品名称', trigger: 'blur' },
-          { min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'blur' }
+          { required: true, message: "请输入商品名称", trigger: "blur" },
+          { min: 1, max: 20, message: "长度在 1 到 20 个字符", trigger: "blur" }
         ],
-        sort: [
-          { required: true, message: '请输入商品名称', trigger: 'blur' }
-        ],
-        price: [
-          { required: true, message: '请输入商品价格', trigger: 'blur' }
-        ]
+        sort: [{ required: true, message: "请输入商品名称", trigger: "blur" }],
+        price: [{ required: true, message: "请输入商品价格", trigger: "blur" }]
       }
     };
   },
@@ -186,7 +189,7 @@ export default {
     },
     handleAddGoodsList() {
       this.getGoodsType();
-      this.handleAdd()
+      this.handleAdd();
     },
     // 获取商品分类，将取得的值赋值给goodsTypes
     getGoodsType() {
@@ -197,8 +200,9 @@ export default {
           for (let typeName = 0; typeName < resp.data.length; typeName++) {
             const element = resp.data[typeName];
             const typeNameOptions = {
-              value: element.id,
-              typeName: element.typeName
+              value: element.typeName,
+              typeName: element.typeName,
+              id: element.id
             };
             this.goodsTypes.push(typeNameOptions);
           }
@@ -214,35 +218,70 @@ export default {
       });
     },
     addGoodsList() {
-      this.$refs['addGoodsListForm'].validate(valid => {
-        if(valid) {
+      this.$refs["addGoodsListForm"].validate(valid => {
+        if (valid) {
           goodsListApi.addGoodsList(this.goodsListForm).then(res => {
-            const resp = res.data
-            if(resp.flag) {
+            const resp = res.data;
+            if (resp.flag) {
               this.$message({
                 message: resp.message,
-                type: 'success'
-              })
-              this.fetchData()
-              this.dialogFormVisible = false
+                type: "success"
+              });
+              this.fetchData();
+              this.dialogFormVisible = false;
             } else {
               this.$message({
                 message: resp.message,
-                type: 'error'
+                type: "error"
               }),
-              this.dialogFormVisible = false
+                (this.dialogFormVisible = false);
             }
-          })
+          });
         } else {
-          return false
+          return false;
         }
-      })
+      });
     },
-    handleEdit(index, row) {
-      console.log(index, row);
+    handleEdit(id) {
+      goodsListApi.getById(id).then(res => {
+        const resp = res.data;
+        if (resp.flag) {
+          this.nowTypeName = resp.data.typeName;
+          this.goodsListForm = resp.data;
+        }
+        console.log(this.goodsListForm);
+
+        this.getGoodsType();
+        this.handleAdd();
+      });
     },
     handleDelete(index, row) {
       console.log(index, row);
+    },
+    updateById() {
+      this.$refs["addGoodsListForm"].validate(valid => {
+        if (valid) {
+          goodsListApi.updateById(this.goodsListForm).then(res => {
+            const resp = res.data;
+            if (resp.flag) {
+              this.$message({
+                message: resp.message,
+                type: "success"
+              });
+              this.fetchData();
+              this.dialogFormVisible = false;
+            } else {
+              this.$message({
+                message: resp.message,
+                type: "error"
+              });
+              this.dialogFormVisible = false;
+            }
+          });
+        } else {
+          return false
+        }
+      });
     }
   }
 };

@@ -21,4 +21,17 @@ export default {
             data
         })
     },
+    getById(id) {
+        return request({
+            url: `/goods/list/${id}`,
+            method: 'get'
+        })
+    },
+    updateById(data) {
+        return request({
+            url: `goods/list/${data.id}`,
+            method: 'put',
+            data
+        })
+    }
 }
