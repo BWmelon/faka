@@ -30,7 +30,7 @@
         <template slot-scope="scope">
           <el-button
             size="mini"
-            @click="handleEdit(scope.$index, scope.row)"
+            @click="handleChangeStatus(scope.row.id)"
             :type="scope.row.status === 1 ? 'primary' : 'success'"
           >{{ scope.row.status === 1 ? '下架' : '上架' }}</el-button>
           <el-button size="mini" @click="handleEdit(scope.row.id)" type="primary">编辑</el-button>
@@ -249,8 +249,6 @@ export default {
           this.nowTypeName = resp.data.typeName;
           this.goodsListForm = resp.data;
         }
-        console.log(this.goodsListForm);
-
         this.getGoodsType();
         this.handleAdd();
       });
@@ -282,6 +280,30 @@ export default {
           return false
         }
       });
+    },
+    handleChangeStatus(id) {
+      goodsListApi.getById(id).then(res => {
+        const resp = res.data
+        if(resp.flag) {
+          this.goodsListForm = resp.data
+          this.goodsListForm.status = this.goodsListForm.status == 1 ? 0 : 1
+          goodsListApi.updateById(this.goodsListForm).then(res => {
+            const resp = res.data
+            if(resp.flag) {
+              this.$message({
+                message: resp.message,
+                type: "success"
+              });
+              this.fetchData();
+            } else {
+              this.$message({
+                message: resp.message,
+                type: "error"
+              });
+            }
+          })
+        }
+      })
     }
   }
 };
