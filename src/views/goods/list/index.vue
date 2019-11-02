@@ -35,7 +35,7 @@
           >{{ scope.row.status === 1 ? '下架' : '上架' }}</el-button>
           <el-button size="mini" @click="handleEdit(scope.row.id)" type="primary">编辑</el-button>
           <el-button size="mini" @click="handleEdit(scope.$index, scope.row)" type="info">加卡</el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          <el-button size="mini" type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -253,8 +253,39 @@ export default {
         this.handleAdd();
       });
     },
-    handleDelete(index, row) {
-      console.log(index, row);
+    handleDelete(id) {
+      this.$confirm(
+        "删除商品后，该商品对应的所有卡密将被删除，确定要删除该商品?",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }
+      )
+        .then(() => {
+          goodsListApi.delete(id).then(res => {
+            const resp = res.data;
+            if (resp.flag) {
+              this.$message({
+                type: "success",
+                message: resp.message
+              });
+              this.fetchData();
+            } else {
+              this.$message({
+                type: "error",
+                message: resp.message
+              });
+            }
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除"
+          });
+        });
     },
     updateById() {
       this.$refs["addGoodsListForm"].validate(valid => {
@@ -277,19 +308,19 @@ export default {
             }
           });
         } else {
-          return false
+          return false;
         }
       });
     },
     handleChangeStatus(id) {
       goodsListApi.getById(id).then(res => {
-        const resp = res.data
-        if(resp.flag) {
-          this.goodsListForm = resp.data
-          this.goodsListForm.status = this.goodsListForm.status == 1 ? 0 : 1
+        const resp = res.data;
+        if (resp.flag) {
+          this.goodsListForm = resp.data;
+          this.goodsListForm.status = this.goodsListForm.status == 1 ? 0 : 1;
           goodsListApi.updateById(this.goodsListForm).then(res => {
-            const resp = res.data
-            if(resp.flag) {
+            const resp = res.data;
+            if (resp.flag) {
               this.$message({
                 message: resp.message,
                 type: "success"
@@ -301,9 +332,9 @@ export default {
                 type: "error"
               });
             }
-          })
+          });
         }
-      })
+      });
     }
   }
 };
