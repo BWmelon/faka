@@ -13,4 +13,12 @@ export default {
             method: 'get'
         })
     },
+    // 新增商品
+    addGoodsList(data) {
+        return request({
+            url: '/goods/list',
+            method: 'post',
+            data
+        })
+    },
 }

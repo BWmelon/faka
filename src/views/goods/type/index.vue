@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-button type="primary" icon="el-icon-plus" @click="handleAdd">新增</el-button>
+    <el-button type="success" icon="el-icon-plus" @click="handleAdd" size="small">新增</el-button>
     <el-table :data="goodsTypeList" height="700" border style="width: 100%">
       <el-table-column type="index" label="序号"></el-table-column>
       <el-table-column prop="typeName" label="分类名称" width="300"></el-table-column>
@@ -171,16 +171,6 @@ export default {
             message: "已取消删除"
           });
         });
-    },
-    submitForm(formName) {
-      this.$refs[formName].validate(valid => {
-        if (valid) {
-          alert("submit!");
-        } else {
-          console.log("error submit!!");
-          return false;
-        }
-      });
     },
     addGoodsType(formName) {
       this.$refs[formName].validate(valid => {

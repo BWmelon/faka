@@ -1,5 +1,9 @@
 <template>
   <div>
+    <!-- 新增开始 -->
+    <el-button type="success" icon="el-icon-plus" @click="handleAddGoodsList" size="small">新增</el-button>
+    <!-- 新增结束 -->
+    <!-- talel开始 -->
     <el-table :data="goodsList" height="700" border style="width: 100%">
       <el-table-column prop="goodsName" label="商品名称" width="180"></el-table-column>
       <el-table-column prop="typeName" label="商品分类" width="180"></el-table-column>
@@ -24,13 +28,75 @@
       <el-table-column prop="sell" label="售出"></el-table-column>
       <el-table-column label="操作" width="280">
         <template slot-scope="scope">
-          <el-button size="mini" @click="handleEdit(scope.$index, scope.row)" :type="scope.row.status === 1 ? 'primary' : 'success'">{{ scope.row.status === 1 ? '下架' : '上架' }}</el-button>
+          <el-button
+            size="mini"
+            @click="handleEdit(scope.$index, scope.row)"
+            :type="scope.row.status === 1 ? 'primary' : 'success'"
+          >{{ scope.row.status === 1 ? '下架' : '上架' }}</el-button>
           <el-button size="mini" @click="handleEdit(scope.$index, scope.row)" type="primary">编辑</el-button>
           <el-button size="mini" @click="handleEdit(scope.$index, scope.row)" type="info">加卡</el-button>
           <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
+    <!-- talel结束 -->
+    <!-- dialog开始 -->
+    <el-dialog title="商品编辑" :visible.sync="dialogFormVisible">
+      <el-form :model="goodsListForm" ref="addGoodsListForm">
+        <el-row>
+          <el-form-item label="活动区域" :label-width="formLabelWidth">
+            <el-col :span="14">
+              <el-select v-model="goodsListForm.typeName" placeholder="请选择商品分类">
+                <el-option
+                  v-for="item in goodsTypes"
+                  :label="item.typeName"
+                  :value="item.value"
+                  :key="item.value"
+                ></el-option>
+              </el-select>
+            </el-col>
+            <el-col :span="10">
+              <el-alert title="请选择商品分类" type="warning" show-icon :closable="false"></el-alert>
+            </el-col>
+          </el-form-item>
+        </el-row>
+        <el-row>
+          <el-form-item label="商品名称" :label-width="formLabelWidth" prop="goodsName">
+            <el-col :span="14">
+              <el-input v-model="goodsListForm.goodsName" autocomplete="off"></el-input>
+            </el-col>
+            <el-col :span="10">
+              <el-alert title="请输入商品名称，最多20个字" type="warning" show-icon :closable="false"></el-alert>
+            </el-col>
+          </el-form-item>
+        </el-row>
+        <el-row>
+          <el-form-item label="商品排序" :label-width="formLabelWidth" prop="sort">
+            <el-col :span="14">
+              <el-input v-model="goodsListForm.sort" autocomplete="off"></el-input>
+            </el-col>
+            <el-col :span="10">
+              <el-alert title="请输入数字，越大排序越靠前" type="warning" show-icon :closable="false"></el-alert>
+            </el-col>
+          </el-form-item>
+        </el-row>
+        <el-row>
+          <el-form-item label="出售价格" :label-width="formLabelWidth" prop="price">
+            <el-col :span="14">
+              <el-input v-model="goodsListForm.price" autocomplete="off"></el-input>
+            </el-col>
+            <el-col :span="10">
+              <el-alert title="请输入对外出售的价格" type="warning" show-icon :closable="false"></el-alert>
+            </el-col>
+          </el-form-item>
+        </el-row>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+      </div>
+    </el-dialog>
+    <!-- dialog结束 -->
     <!-- 底部分页开始 -->
     <el-pagination
       @size-change="handleSizeChange"
@@ -51,6 +117,7 @@ const statusOptions = [
   { type: 1, name: "上架中" }
 ];
 import goodsListApi from "@/api/goodsList";
+import goodsTypeApi from "@/api/goodsType";
 export default {
   data() {
     return {
@@ -59,15 +126,18 @@ export default {
         id: null,
         goodsName: null,
         typeName: null,
-        sort: null,
-        status: null,
+        sort: 1,
+        status: 0,
         price: null,
         stock: null,
         sock: null
       },
+      goodsTypes: [], //商品分类，用于添加或者修改商品信息时选择商品分类
       currentPage: 1,
       pageSize: 10,
-      total: 0
+      total: 0,
+      dialogFormVisible: false,
+      formLabelWidth: "120px"
     };
   },
   filters: {
@@ -103,6 +173,27 @@ export default {
       this.currentPage = val;
       this.fetchData();
     },
+    handleAddGoodsList() {
+      this.getGoodsType();
+      this.dialogFormVisible = true;
+    },
+    // 获取商品分类，将取得的值赋值给goodsTypes
+    getGoodsType() {
+      goodsTypeApi.getGoodsTypeList().then(res => {
+        const resp = res.data;
+        this.goodsTypes = [];
+        if (resp.flag) {
+          for (let typeName = 0; typeName < resp.data.length; typeName++) {
+            const element = resp.data[typeName];
+            const typeNameOptions = {
+              value: element.id,
+              typeName: element.typeName
+            };
+            this.goodsTypes.push(typeNameOptions);
+          }
+        }
+      });
+    },
     handleEdit(index, row) {
       console.log(index, row);
     },
@@ -114,4 +205,9 @@ export default {
 </script>
 
 <style scoped>
+.el-alert {
+  padding-top: 0;
+  padding-bottom: 0;
+  background-color: transparent;
+}
 </style>
