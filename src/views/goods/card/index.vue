@@ -1,7 +1,32 @@
 <template>
   <div>
     <!-- 顶部按钮开始 -->
-    <el-button type="success" icon="el-icon-plus" @click="handleDeleteMoreCard" size="small">删除选中</el-button>
+    <el-row>
+      <el-col>
+        <el-button
+          type="success"
+          icon="el-icon-plus"
+          @click="handleDeleteMoreCard"
+          size="small"
+        >删除选中</el-button>
+      </el-col>
+      <el-col>
+        <el-form>
+          <el-form-item>
+            <el-select v-model="nowGoodsNameId" placeholder="所有商品" @change="handleChangGoodName">
+              <el-option label="所有商品" value="所有商品"></el-option>
+              <el-option
+                v-for="item in goodsName"
+                :label="item.goodsName"
+                :value="item.id"
+                :key="item.id"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+        </el-form>
+      </el-col>
+    </el-row>
+
     <!-- 顶部按钮结束 -->
     <el-table
       ref="goodsCardTable"
@@ -40,8 +65,10 @@
 
 <script>
 import goodsCardApi from "@/api/goodsCard";
+import goodsListApi from "@/api/goodsList";
 export default {
   created() {
+    this.getGoodsName();
     this.fetchData();
   },
   data() {
@@ -51,21 +78,40 @@ export default {
       pageSize: 10,
       total: 0,
       multipleSelection: [],
-      cardIdToDelete: []
+      cardIdToDelete: [],
+      goodsName: [], //所以商品名称
+      nowGoodsNameId: "所有商品" //当前被选择的商品
     };
   },
   methods: {
     fetchData() {
-      // goodsCardApi.getGoodsCard().then(res => {
-      goodsCardApi
-        .getAllPagination(this.currentPage, this.pageSize)
-        .then(res => {
-          const resp = res.data;
-          if (resp.flag) {
-            this.goodsCard = resp.data.rows;
-            this.total = resp.data.total;
-          }
-        });
+      if (this.nowGoodsNameId == "所有商品") {
+        // goodsCardApi.getGoodsCard().then(res => {
+        goodsCardApi
+          .getAllPagination(this.currentPage, this.pageSize)
+          .then(res => {
+            const resp = res.data;
+            if (resp.flag) {
+              this.goodsCard = resp.data.rows;
+              this.total = resp.data.total;
+            }
+          });
+      } else {
+        this.goodsCard = [];
+        goodsCardApi
+          .getPaginationByGoodsId(
+            this.nowGoodsNameId,
+            this.currentPage,
+            this.pageSize
+          )
+          .then(res => {
+            const resp = res.data;
+            if (resp.flag) {
+              this.goodsCard = resp.data.rows;
+              this.total = resp.data.total;
+            }
+          });
+      }
     },
     handleSelectionChange(val) {
       this.cardIdToDelete = [];
@@ -143,11 +189,47 @@ export default {
     },
     handleSizeChange(val) {
       this.pageSize = val;
-      this.fetchDate();
+      this.fetchData();
     },
     handleCurrentChange(val) {
       this.currentPage = val;
-      this.fetchDate();
+      this.fetchData();
+    },
+    // 获取所有商品名称
+    getGoodsName() {
+      this.goodsName = [];
+      goodsListApi.getGoodsList().then(res => {
+        const resp = res.data;
+        if (resp.flag) {
+          resp.data.forEach(item => {
+            this.goodsName.push({
+              id: item.id,
+              value: item.goodsName,
+              goodsName: item.goodsName
+            });
+          });
+        }
+      });
+    },
+    handleChangGoodName() {
+      if (this.nowGoodsNameId == "所有商品") {
+        this.fetchData();
+      } else {
+        this.goodsCard = [];
+        goodsCardApi
+          .getPaginationByGoodsId(
+            this.nowGoodsNameId,
+            this.currentPage,
+            this.pageSize
+          )
+          .then(res => {
+            const resp = res.data;
+            if (resp.flag) {
+              this.goodsCard = resp.data.rows;
+              this.total = resp.data.total;
+            }
+          });
+      }
     }
   }
 };

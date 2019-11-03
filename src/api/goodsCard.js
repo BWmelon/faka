@@ -15,7 +15,10 @@ export default {
     },
     // 根据商品名称获取未出售卡密分页
     getPaginationByGoodsId(id, page, size) {
-
+        return request({
+            url: `/goods/card/${id}/${page}/${size}`,
+            method: 'get'
+        })
     },
     // 删除单一卡密
     deleteOneById(id) {
