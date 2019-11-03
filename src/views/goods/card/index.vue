@@ -39,7 +39,7 @@
 import goodsCardApi from "@/api/goodsCard";
 export default {
   created() {
-    this.fetchDate();
+    this.fetchData();
   },
   data() {
     return {
@@ -50,7 +50,7 @@ export default {
     };
   },
   methods: {
-    fetchDate() {
+    fetchData() {
       // goodsCardApi.getGoodsCard().then(res => {
       goodsCardApi
         .getAllPagination(this.currentPage, this.pageSize)
@@ -66,7 +66,36 @@ export default {
       this.multipleSelection = val;
     },
     handleDelete(id) {
-      console.log(id);
+      this.$confirm(
+        "确定要删除该卡密信息?",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }
+      ).then(() => {
+          goodsCardApi.deleteById(id).then(res => {
+            const resp = res.data;
+            if (resp.flag) {
+              this.$message({
+                type: "success",
+                message: resp.message
+              });
+              this.fetchData();
+            } else {
+              this.$message({
+                type: "error",
+                message: resp.message
+              });
+            }
+          });      
+        }).catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除"
+          });
+        });
     },
     handleSizeChange(val) {
       this.pageSize = val;

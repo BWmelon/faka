@@ -17,4 +17,11 @@ export default {
     getPaginationByGoodsId(id, page, size) {
 
     },
+    // 删除卡密
+    deleteById(id) {
+        return request({
+            url: `goods/card/${id}`,
+            method: 'delete'
+        })
+    }
 }
