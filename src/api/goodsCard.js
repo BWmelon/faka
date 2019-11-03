@@ -17,11 +17,18 @@ export default {
     getPaginationByGoodsId(id, page, size) {
 
     },
-    // 删除卡密
-    deleteById(id) {
+    // 删除单一卡密
+    deleteOneById(id) {
         return request({
             url: `goods/card/${id}`,
             method: 'delete'
+        })
+    },
+    deleteMoreById(data) {
+        return request({
+            url: `goods/card/delete`,
+            method: 'post',
+            data
         })
     }
 }

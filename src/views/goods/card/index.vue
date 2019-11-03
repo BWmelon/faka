@@ -1,5 +1,8 @@
 <template>
   <div>
+    <!-- 顶部按钮开始 -->
+    <el-button type="success" icon="el-icon-plus" @click="handleDeleteMoreCard" size="small">删除选中</el-button>
+    <!-- 顶部按钮结束 -->
     <el-table
       ref="goodsCardTable"
       :data="goodsCard"
@@ -46,7 +49,9 @@ export default {
       goodsCard: [],
       currentPage: 1,
       pageSize: 10,
-      total: 0
+      total: 0,
+      multipleSelection: [],
+      cardIdToDelete: []
     };
   },
   methods: {
@@ -63,18 +68,56 @@ export default {
         });
     },
     handleSelectionChange(val) {
+      this.cardIdToDelete = [];
       this.multipleSelection = val;
+      this.multipleSelection.forEach(item => {
+        this.cardIdToDelete.push(item.id);
+      });
     },
-    handleDelete(id) {
-      this.$confirm(
-        "确定要删除该卡密信息?",
-        "提示",
-        {
+    handleDeleteMoreCard() {
+      if (this.cardIdToDelete.length > 0) {
+        this.$confirm("确定要删除该卡密信息?", "提示", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "warning"
-        }
-      ).then(() => {
+        })
+          .then(() => {
+            goodsCardApi.deleteMoreById(this.cardIdToDelete).then(res => {
+              const resp = res.data;
+              if (resp.flag) {
+                this.$message({
+                  type: "success",
+                  message: resp.message
+                });
+                this.fetchData();
+              } else {
+                this.$message({
+                  type: "error",
+                  message: resp.message
+                });
+              }
+            });
+          })
+          .catch(() => {
+            this.$message({
+              type: "info",
+              message: "已取消删除"
+            });
+          });
+      } else {
+        this.$message({
+          message: "请先选择需要删除的卡密",
+          type: "error"
+        });
+      }
+    },
+    handleDelete(id) {
+      this.$confirm("确定要删除该卡密信息?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
           goodsCardApi.deleteById(id).then(res => {
             const resp = res.data;
             if (resp.flag) {
@@ -89,8 +132,9 @@ export default {
                 message: resp.message
               });
             }
-          });      
-        }).catch(() => {
+          });
+        })
+        .catch(() => {
           this.$message({
             type: "info",
             message: "已取消删除"
