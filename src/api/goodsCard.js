@@ -33,5 +33,18 @@ export default {
             method: 'post',
             data
         })
+    },
+    getGoodsNameByGoodsTypeId(id) {
+        return request({
+            url: `/goods/list/type/${id}`,
+            method: 'get'
+        })
+    },
+    addCards(data) {
+        return request({
+            url: '/goods/card',
+            method: 'post',
+            data
+        })
     }
 }

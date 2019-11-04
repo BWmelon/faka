@@ -25,6 +25,9 @@
           </el-form-item>
         </el-form>
       </el-col>
+      <el-col>
+        <el-button type="success" icon="el-icon-plus" @click="handleAddCards" size="small">添加卡密</el-button>
+      </el-col>
     </el-row>
 
     <!-- 顶部按钮结束 -->
@@ -60,16 +63,75 @@
       :total="total"
     ></el-pagination>
     <!-- 分页结束 -->
+    <!-- dialog开始 -->
+    <el-dialog title="卡密编辑" :visible.sync="dialogFormVisible" width="80%">
+      <el-form :model="addCardForm" ref="addCardsForm" :rules="rules">
+        <!-- <el-form-item label="活动名称" :label-width="formLabelWidth">
+          <el-input v-model="form.name" autocomplete="off"></el-input>
+        </el-form-item>-->
+        <el-row>
+          <el-form-item label="商品分类" :label-width="formLabelWidth" prop="nowAddCardGoodsTypeId">
+            <el-col :span="14">
+              <!-- <el-select v-model="goodsListForm.typeName" :value="nowTypeName" placeholder="请选择商品分类"> -->
+              <el-select v-model="nowAddCardGoodsTypeId" placeholder="请选择商品分类" @change="getGoodsNameByGoodsTypeId(nowAddCardGoodsTypeId)">
+                <el-option
+                  v-for="item in goodsType"
+                  :label="item.goodsType"
+                  :value="item.id"
+                  :key="item.id"
+                ></el-option>
+              </el-select>
+            </el-col>
+            <el-col :span="10">
+              <el-alert title="请选择商品分类" type="warning" show-icon :closable="false"></el-alert>
+            </el-col>
+          </el-form-item>
+        </el-row>
+        <el-row>
+          <el-form-item label="商品名称" :label-width="formLabelWidth" prop="goodsNameByTypeId">
+            <el-col :span="14">
+              <!-- <el-select v-model="goodsListForm.typeName" :value="nowTypeName" placeholder="请选择商品分类"> -->
+              <el-select v-model="nowAddCardGoodsNameId" placeholder="请选择商品">
+                <el-option
+                  v-for="item in goodsNameByTypeId"
+                  :label="item.goodsName"
+                  :value="item.id"
+                  :key="item.id"
+                ></el-option>
+              </el-select>
+            </el-col>
+            <el-col :span="10">
+              <el-alert title="请选择商品" type="warning" show-icon :closable="false"></el-alert>
+            </el-col>
+          </el-form-item>
+        </el-row>
+        <el-row>
+          <el-form-item label="卡密信息" :label-width="formLabelWidth" prop="cards">
+            <el-col :span="24">
+              <!-- <el-select v-model="goodsListForm.typeName" :value="nowTypeName" placeholder="请选择商品分类"> -->
+              <el-input type="textarea" v-model="addCardForm.cards" autocomplete="off" placeholder="请输入卡密，一行一个" rows=10></el-input>
+            </el-col>
+          </el-form-item>
+        </el-row>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitAddCards">确 定</el-button>
+      </div>
+    </el-dialog>
+    <!-- dialog结束 -->
   </div>
 </template>
 
 <script>
+import goodsTypeApi from '@/api/goodsType'
 import goodsCardApi from "@/api/goodsCard";
 import goodsListApi from "@/api/goodsList";
 export default {
   created() {
-    this.getGoodsName();
     this.fetchData();
+    this.getGoodsType()
+    this.getAllGoodsName()
   },
   data() {
     return {
@@ -79,8 +141,30 @@ export default {
       total: 0,
       multipleSelection: [],
       cardIdToDelete: [],
+      goodsType: [], //所以商品分类名称
       goodsName: [], //所以商品名称
-      nowGoodsNameId: "所有商品" //当前被选择的商品
+      goodsNameByTypeId: [], //根据商品分类id获取到的商品
+      nowGoodsNameId: "所有商品", //查询卡密时当前被选择的商品
+      nowAddCardGoodsTypeId: null, //在添加卡密弹窗中被选择的商品分类id
+      nowAddCardGoodsNameId: null, //在添加卡密弹窗中被选择的商品id
+      dialogFormVisible: false,
+      addCardForm: {
+        goodsType: null,
+        goodsName: null,
+        cards: ""
+      },
+      rules: {
+        goodsType: [
+          { required: true, message: "请选择商品分类", trigger: "change" }
+        ],
+        goodsName: [
+          { required: true, message: "请选择商品", trigger: "change" }
+        ],
+        cards: [
+          { required: true, message: "请输入需要导入的卡密", trigger: "blur" }
+        ]
+      },
+      formLabelWidth: "120px"
     };
   },
   methods: {
@@ -112,6 +196,36 @@ export default {
             }
           });
       }
+    },
+    getAllGoodsName() {
+      goodsListApi.getGoodsList().then(res => {
+        const resp = res.data
+        if(resp.flag) {
+          resp.data.forEach(item => {
+            this.goodsName.push({
+              id: item.id,
+              value: item.id,
+              goodsName: item.goodsName
+            })
+          })
+        }
+
+      })
+    },
+    getGoodsType() {
+      this.goodsType = []
+      goodsTypeApi.getGoodsTypeList().then(res => {
+        const resp = res.data
+        if(resp.flag) {
+          resp.data.forEach(item => {
+            this.goodsType.push({
+              id: item.id,
+              value: item.id,
+              goodsType: item.typeName
+            })
+          })
+        }
+      })
     },
     handleSelectionChange(val) {
       this.cardIdToDelete = [];
@@ -195,21 +309,22 @@ export default {
       this.currentPage = val;
       this.fetchData();
     },
-    // 获取所有商品名称
-    getGoodsName() {
-      this.goodsName = [];
-      goodsListApi.getGoodsList().then(res => {
-        const resp = res.data;
-        if (resp.flag) {
+    // 在添加卡密弹窗中根据已选择商品分类获取该分类下的商品
+    getGoodsNameByGoodsTypeId(id) {
+      console.log(id)
+      this.goodsNameByTypeId = []
+      goodsCardApi.getGoodsNameByGoodsTypeId(id).then(res => {
+        const resp = res.data
+        if(resp.flag) {
           resp.data.forEach(item => {
-            this.goodsName.push({
+            this.goodsNameByTypeId.push({
               id: item.id,
-              value: item.goodsName,
+              value: item.id,
               goodsName: item.goodsName
-            });
-          });
-        }
-      });
+            })
+          })
+        } 
+      })
     },
     handleChangGoodName() {
       if (this.nowGoodsNameId == "所有商品") {
@@ -230,6 +345,42 @@ export default {
             }
           });
       }
+    },
+    handleAddCards() {
+      this.handleAdd();
+    },
+    // 弹出窗口重置
+    handleAdd() {
+      this.dialogFormVisible = true;
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.$refs["addCardForm"].resetFields();
+          this.$refs["addCardForm"].clearValidate();
+        }, 1500);
+      });
+    },
+    submitAddCards() {
+      this.$refs['addCardsForm'].validate(valid => {
+        if(valid) {
+          goodsCardApi.addCards(this.addCardForm).then(res => {
+            const resp = res.data
+            if(resp.flag) {
+              this.$message({
+                message: resp.message,
+                type: 'success'
+              })
+              this.dialogFormVisible = false
+              this.fetchData()
+            } else {
+              this.$message({
+                message: resp.message,
+                type: 'error'
+              })
+            }
+            
+          })
+        }
+      })
     }
   }
 };
