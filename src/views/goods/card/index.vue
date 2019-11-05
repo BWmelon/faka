@@ -70,10 +70,10 @@
           <el-input v-model="form.name" autocomplete="off"></el-input>
         </el-form-item>-->
         <el-row>
-          <el-form-item label="商品分类" :label-width="formLabelWidth" prop="nowAddCardGoodsTypeId">
+          <el-form-item label="商品分类" :label-width="formLabelWidth" prop="goodsType">
             <el-col :span="14">
               <!-- <el-select v-model="goodsListForm.typeName" :value="nowTypeName" placeholder="请选择商品分类"> -->
-              <el-select v-model="nowAddCardGoodsTypeId" placeholder="请选择商品分类" @change="getGoodsNameByGoodsTypeId(nowAddCardGoodsTypeId)">
+              <el-select v-model="addCardForm.goodsType" placeholder="请选择商品分类" @change="getGoodsNameByGoodsTypeId(nowAddCardGoodsTypeId)">
                 <el-option
                   v-for="item in goodsType"
                   :label="item.goodsType"
@@ -88,10 +88,10 @@
           </el-form-item>
         </el-row>
         <el-row>
-          <el-form-item label="商品名称" :label-width="formLabelWidth" prop="goodsNameByTypeId">
+          <el-form-item label="商品名称" :label-width="formLabelWidth" prop="goodsName">
             <el-col :span="14">
               <!-- <el-select v-model="goodsListForm.typeName" :value="nowTypeName" placeholder="请选择商品分类"> -->
-              <el-select v-model="nowAddCardGoodsNameId" placeholder="请选择商品">
+              <el-select v-model="addCardForm.goodsName" placeholder="请选择商品">
                 <el-option
                   v-for="item in goodsNameByTypeId"
                   :label="item.goodsName"
@@ -311,7 +311,7 @@ export default {
     },
     // 在添加卡密弹窗中根据已选择商品分类获取该分类下的商品
     getGoodsNameByGoodsTypeId(id) {
-      console.log(id)
+      this.nowAddCardGoodsTypeId = this.addCardForm.goodsType
       this.goodsNameByTypeId = []
       goodsCardApi.getGoodsNameByGoodsTypeId(id).then(res => {
         const resp = res.data
