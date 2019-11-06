@@ -1,5 +1,6 @@
 <template>
   <div class="header">
+    <i class="el-icon-menu" @click="$store.state.isCollapse = !$store.state.isCollapse"></i>
     <el-dropdown @command="handleCommand">
       <span class="el-dropdown-link">
         admin
@@ -14,7 +15,7 @@
 </template>
 
 <script>
-import {logout} from "@/api/login";
+import { logout } from "@/api/login";
 export default {
   methods: {
     handleCommand(command) {
@@ -24,7 +25,7 @@ export default {
           break;
 
         case "b":
-          const token = localStorage.getItem("faka-token")
+          const token = localStorage.getItem("faka-token");
           logout(token).then(res => {
             const resp = res.data;
             if (resp.flag) {
@@ -32,9 +33,9 @@ export default {
                 message: resp.message,
                 type: "success"
               });
-              localStorage.removeItem("faka-token")
-              localStorage.removeItem("faka-user")
-              this.$router.push('admin')
+              localStorage.removeItem("faka-token");
+              localStorage.removeItem("faka-user");
+              this.$router.push("admin");
             } else {
               this.$message({
                 message: resp.message,
@@ -47,7 +48,8 @@ export default {
         default:
           break;
       }
-    }
+    },
+    toggleSidebar() {}
   }
 };
 </script>
@@ -64,5 +66,10 @@ export default {
 }
 .el-icon-arrow-down {
   font-size: 12px;
+}
+.el-icon-menu {
+  margin-left: 20px;
+  color: #fff;
+  cursor: pointer;
 }
 </style>

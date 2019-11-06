@@ -2,13 +2,15 @@
   <div class="navbar">
     <el-menu
       default-active="/home"
+      class="el-menu-vertical-demo"
       @open="handleOpen"
       @close="handleClose"
-      background-color="#000"
-      text-color="#fff"
-      active-text-color="#ffd04b"
+      :collapse="$store.state.isCollapse"
+      background-color="#222D32"
+      text-color="#B8C7CE"
+      style="border: 0"
+      active-text-color="#fff"
       :router="true"
-      style="border: 0;"
     >
       <el-menu-item index="/home">
         <i class="el-icon-setting"></i>
@@ -49,17 +51,24 @@
 
 <script>
 export default {
-    methods: {
-      handleOpen(key, keyPath) {
-        console.log(key, keyPath);
-      },
-      handleClose(key, keyPath) {
-        console.log(key, keyPath);
-      }
+  methods: {
+    handleOpen(key, keyPath) {
+      console.log(key, keyPath);
+    },
+    handleClose(key, keyPath) {
+      console.log(key, keyPath);
     }
-  
+  },
+  data() {
+    return {
+    };
+  }
 };
 </script>
 
 <style scoped>
+.el-menu-vertical-demo:not(.el-menu--collapse) {
+  width: 200px;
+  min-height: 400px;
+}
 </style>

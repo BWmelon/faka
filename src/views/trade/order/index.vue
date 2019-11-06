@@ -9,6 +9,7 @@
         :filters="[{ text: '已支付', value: 1 }, { text: '未支付', value: 0 }]"
         :filter-method="filterStatus"
         filter-placement="bottom-end"
+        width="90"
       >
         <template slot-scope="scope">
           <el-tag
@@ -19,20 +20,20 @@
       </el-table-column>
       <el-table-column prop="goodstype" label="商品分类"></el-table-column>
       <el-table-column prop="goodsname" label="商品名称"></el-table-column>
-      <el-table-column prop="money" label="支付金额" width="100"></el-table-column>
-      <el-table-column prop="amount" label="下单数量" width="100"></el-table-column>
-      <el-table-column prop="paytype" label="支付方式">
+      <el-table-column prop="money" label="支付金额" width="50"></el-table-column>
+      <el-table-column prop="amount" label="下单数量" width="50"></el-table-column>
+      <el-table-column prop="paytype" label="支付方式" width="80">
         <template slot-scope="scope">
           <span>{{scope.row.paytype | payTypeFilter}}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="linktype" label="联系方式">
+      <el-table-column prop="linktype" label="联系方式" width="80">
           <template slot-scope="scope">
           <span>{{scope.row.linktype | linkTypeFilter}}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="phone" label="客户信息"></el-table-column>
-      <el-table-column label="管理" width="150">
+      <el-table-column prop="phone" label="客户信息" width="140"></el-table-column>
+      <el-table-column label="管理" width="110">
         <template slot-scope="scope">
           <el-button size="mini" @click="handleDetail(scope.row.id)" type="primary">查看详情</el-button>
         </template>
