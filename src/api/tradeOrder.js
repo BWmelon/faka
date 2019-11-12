@@ -11,5 +11,11 @@ export default {
             url: `/trade/order/${page}/${size}`,
             method: 'get'
         })
+    },
+    getByOrderId(orderId) {
+        return request({
+            url: `/trade/order/${orderId}`,
+            method: 'get'
+        })
     }
 }
