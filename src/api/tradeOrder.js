@@ -17,5 +17,11 @@ export default {
             url: `/trade/order/${orderId}`,
             method: 'get'
         })
+    },
+    getById(id) {
+        return request({
+            url: `/trade/order/${id}`,
+            method: 'get'
+        })
     }
 }

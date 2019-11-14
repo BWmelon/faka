@@ -30,9 +30,11 @@
           ></el-option>
         </el-select>
       </el-form-item>
-      <el-input placeholder="订单编号查询" v-model="orderId">
-        <el-button slot="append" icon="el-icon-search" @click="handleSearch"></el-button>
-      </el-input>
+      <el-form-item>
+        <el-input placeholder="订单编号查询" v-model="orderId">
+          <el-button slot="append" icon="el-icon-search" @click="handleSearch"></el-button>
+        </el-input>
+      </el-form-item>
       <!-- <el-form-item prop="birthday">
         <el-date-picker
           value-format="yyyy-MM-dd"
@@ -47,6 +49,69 @@
         <el-button icon="el-icon-refresh-right" @click="resetForm('searchForm')">重置</el-button>
       </el-form-item>-->
     </el-form>
+    <!-- 查看详情对话框开始 -->
+    <el-dialog title="订单详情" :visible.sync="dialogTableVisible">
+      <p>
+        <span>订单编号:</span>
+        <span>{{detail.orderid}}</span>
+      </p>
+      <p>
+        <span>下单时间:</span>
+        <span>{{detail.ordertime}}</span>
+      </p>
+      <p>
+        <span>支付时间:</span>
+        <span>{{detail.paytime}}</span>
+      </p>
+      <p>
+        <span>订单状态:</span>
+        <span>{{detail.status | payFilter}}</span>
+      </p>
+      <p>
+        <span>商品分类:</span>
+        <span>{{detail.goodstype}}</span>
+      </p>
+      <p>
+        <span>商品名称:</span>
+        <span>{{detail.goodsname}}</span>
+      </p>
+      <p>
+        <span>支付金额:</span>
+        <span>{{detail.money}}</span>
+      </p>
+      <p>
+        <span>购买数量:</span>
+        <span>{{detail.amount}}</span>
+      </p>
+      <p>
+        <span>支付方式:</span>
+        <span>{{detail.paytype | payTypeFilter}}</span>
+      </p>
+      <p>
+        <span>联系方式:</span>
+        <span>{{detail.linktype | linkTypeFilter}}</span>
+      </p>
+      <p>
+        <span>手机号:</span>
+        <span>{{detail.phone}}</span>
+      </p>
+      <p>
+        <span>商户订单号:</span>
+        <span>{{detail.out_trade_no}}</span>
+      </p>
+      <p>
+        <span>支付订单号:</span>
+        <span>{{detail.pay_trade_no}}</span>
+      </p>
+      <p>
+        <span>卡密:</span>
+        <span>{{detail.cards}}</span>
+      </p>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="dialogTableVisible = false">确 定</el-button>
+      </div>
+    </el-dialog>
+    <!-- 查看详情对话框结束 -->
     <!-- 搜索查询结束 -->
     <el-table :data="tableData" height="700" border style="width: 100%">
       <el-table-column prop="orderid" label="订单号" width="200"></el-table-column>
@@ -68,8 +133,8 @@
       </el-table-column>
       <el-table-column prop="goodstype" label="商品分类"></el-table-column>
       <el-table-column prop="goodsname" label="商品名称"></el-table-column>
-      <el-table-column prop="money" label="支付金额" width="50"></el-table-column>
-      <el-table-column prop="amount" label="下单数量" width="50"></el-table-column>
+      <el-table-column prop="money" label="支付金额" width="100"></el-table-column>
+      <el-table-column prop="amount" label="下单数量" width="100"></el-table-column>
       <el-table-column prop="paytype" label="支付方式" width="80">
         <template slot-scope="scope">
           <span>{{scope.row.paytype | payTypeFilter}}</span>
@@ -132,7 +197,23 @@ export default {
       },
       goodsTypes: [],
       goodsNames: [],
-      orderId: null
+      orderId: null,
+      detail: {
+        orderid: null,
+        ordertime: null,
+        paytime: null,
+        status: null,
+        goodstype: null,
+        goodsname: null,
+        money: null,
+        amount: null,
+        paytype: null,
+        linktype: null,
+        out_trade_no: null,
+        pay_trade_no: null,
+        cards: null
+      },
+      dialogTableVisible: false
     };
   },
   methods: {
@@ -148,7 +229,13 @@ export default {
       return row.status === value;
     },
     handleDetail(id) {
-      console.log(id);
+      tradeOrderApi.getById(id).then(res => {
+        const resp = res.data;
+        if (resp.flag) {
+          this.detail = resp.data;
+          this.dialogTableVisible = true;
+        }
+      });
     },
     getAllPagination() {
       tradeOrderApi
@@ -202,22 +289,22 @@ export default {
       if (this.orderId) {
         tradeOrderApi.getByOrderId(this.orderId).then(res => {
           const resp = res.data;
-          if(resp.flag) {
-            this.tableData = []
-            this.tableData[0] = resp.data
+          if (resp.flag) {
+            this.tableData = [];
+            this.tableData[0] = resp.data;
             this.$message({
               message: resp.message,
-              type: 'success'
-            })
+              type: "success"
+            });
           } else {
             this.$message({
               message: resp.message,
-              type: 'warning'
-            })
+              type: "warning"
+            });
           }
         });
       } else {
-        this.getTradeOrder()
+        this.getTradeOrder();
       }
     }
   },
@@ -245,4 +332,13 @@ export default {
 </script>
 
 <style scoped>
+.el-dialog p {
+  border-bottom: 1px dotted #ccc;
+  height: 40px;
+  line-height: 40px;
+  font-size: 14px;
+}
+.el-dialog p span:nth-child(1) {
+  margin-right: 30px;
+}
 </style>
