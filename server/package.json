@@ -1,0 +1,17 @@
+{
+  "name": "faka-admin",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "server": "nodemon server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^3.0.7",
+    "express": "^4.17.1",
+    "mongoose": "^5.7.14"
+  }
+}
