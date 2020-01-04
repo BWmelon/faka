@@ -1,5 +1,5 @@
 {
-  "name": "faka-admin",
+  "name": "faka",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
@@ -10,8 +10,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^3.0.7",
+    "bcryptjs": "^2.4.3",
     "express": "^4.17.1",
-    "mongoose": "^5.7.14"
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.8.4",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0"
   }
 }
