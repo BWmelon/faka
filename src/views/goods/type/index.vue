@@ -59,6 +59,7 @@
 
 <script>
 import goodsTypeApi from "@/api/goodsType";
+import { log } from 'util';
 // 商品分类上架状态
 const statusOptions = [
   { type: 0, name: "已下架" },

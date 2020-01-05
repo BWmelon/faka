@@ -9,7 +9,10 @@ const request = axios.create({
     // baseURL: "/",
     // baseURL: "/dev-api",
     baseURL: process.env.VUE_APP_BASE_API,
-    timeout: 5000
+    timeout: 5000,
+    headers: {
+        'Authorization': localStorage.getItem('faka-token')
+    }
 })
 
 // 请求拦截器
