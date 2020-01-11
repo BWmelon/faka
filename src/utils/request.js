@@ -1,22 +1,22 @@
 import axios from 'axios'
+import router from '@/router'
 
-// axios.get("/db.json").then(res => {
-//     console.log(res.data);
-    
-// })
+import {Message} from 'element-ui';
+
 
 const request = axios.create({
     // baseURL: "/",
     // baseURL: "/dev-api",
     baseURL: process.env.VUE_APP_BASE_API,
-    timeout: 5000,
-    headers: {
-        'Authorization': localStorage.getItem('faka-token')
-    }
+    timeout: 5000
 })
 
 // 请求拦截器
 request.interceptors.request.use(config => {
+    var token = localStorage.getItem('faka-token');
+    if(token) {
+        config.headers.common['Authorization'] = token;
+    }
     return config;
     // 请求拦截
 }, error => {
@@ -26,14 +26,20 @@ request.interceptors.request.use(config => {
 
 // 响应拦截器   
 request.interceptors.response.use(response => {
+    
     return response;
     // 响应拦截
 }, error => {
     // 异常
+
+    // token失效前往登录界面
+    if (error.toString().search('401')) {
+            Message.error({
+                message: '1小时未进行操作，登录状态已过期，请重新登录',
+                time: 5000
+            })
+            router.push('/admin')
+    }
     return Promise.reject(error);
 })
-// request.get("/db.json").then(res => {
-//     console.log(res.data);
-// })
-
 export default request;

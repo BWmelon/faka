@@ -19,8 +19,8 @@
     </div>
 </template>
 <script>
+
 import { login, getUserInfo } from "@/api/login";
-import { log } from "util";
 export default {
     data() {
         return {
