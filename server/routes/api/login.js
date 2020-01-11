@@ -31,18 +31,20 @@ router.post("/", (req, res) => {
             if (!data) {
                 res.json({
                     status: 404,
-                    msg: "管理员账号不正确"
+                    flag: false,
+                    message: "管理员账号不正确"
                 })
             } else {
                 bcrypt.compare(password, data.password)
                     .then(isMatch => {
                         if (!isMatch) {
                             res.json({
-                                status: 404,
-                                msg: "管理员密码不正确"
+                                code: 404,
+                                flag: false,
+                                message: "管理员密码不正确"
                             })
                         } else {
-                            const rule = {id: data.id, name: data.name}
+                            const rule = {id: data.id, name: data.name, timestamp:new Date().getTime()}
                             jwt.sign(rule, keys.serectOrKey,{expiresIn: 3600},(err, token)=> {
                                 if(err) throw err;
                                 
@@ -62,13 +64,15 @@ router.post("/", (req, res) => {
         })
 })
 
-// $route GET user/login/current
+// $route GET user/login/info
 // @desc return current user
 // @access private
 router.get("/info", passport.authenticate('jwt', {session: false}), (req, res) => {
     res.json({
-        id: req.user.id,
-        username: req.user.username
+        flag: true,
+        data: {
+            username: req.user.username
+        }
     })
 })
 

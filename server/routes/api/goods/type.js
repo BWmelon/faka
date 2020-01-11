@@ -5,6 +5,8 @@ const passport =require('passport')
 
 const goodsType = require("../../../models/goods/Type")
 
+const dbutils = require('../../../utils/db');
+
 // $route POST goods/type
 // @desc 新增商品分类接口
 // @access private
@@ -26,8 +28,15 @@ router.post("/", passport.authenticate('jwt', {session: false}),(req, res) => {
 // @desc 获取商品分类数据接口
 // @access private
 router.get("/:currentPage/:pageSize", passport.authenticate('jwt', {session: false}),(req, res) => {
-    goodsType.find().then(data => {
-        var retData = [];
+    // console.log(req.params.currentPage);
+    
+    dbutils.pageQuery(req.params.currentPage,req.params.pageSize,goodsType,{},{},function(err, $data) {
+        // console.log(req.params.currentPage);
+        // console.log(goodsType);
+        console.log($data);
+        
+        var data = $data.results,
+            retData = [];
         data.forEach(element => {
             retData.push({
                 id: element._id,
@@ -36,16 +45,41 @@ router.get("/:currentPage/:pageSize", passport.authenticate('jwt', {session: fal
                 sort: element.sort
             })
         });
+        console.log(data.length);
+        
         res.json({
             code: 2000,
             flag: true,
             message: '查询成功',
             data: {
-                total: data.length,
+                total: $data.total,
                 rows: retData
             }
         })
+    
     })
+    // goodsType.find({}).limit(10).then(data => {
+    //     var retData = [];
+    //     data.forEach(element => {
+    //         retData.push({
+    //             id: element._id,
+    //             status:element.status,
+    //             typeName: element.typeName,
+    //             sort: element.sort
+    //         })
+    //     });
+    //     console.log(data.length);
+        
+    //     res.json({
+    //         code: 2000,
+    //         flag: true,
+    //         message: '查询成功',
+    //         data: {
+    //             total: data.length,
+    //             rows: retData
+    //         }
+    //     })
+    // })
 })
 
 // $route GET goods/type/:id

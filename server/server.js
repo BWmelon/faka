@@ -5,6 +5,7 @@ const passport = require('passport')
 const app = express()
 
 const login = require("./routes/api/login")
+const goodsType = require('./routes/api/goods/type')
 
 // DB config
 const db = require("./config/keys").mongoURI
@@ -26,6 +27,7 @@ require('./config/passport')(passport)
 
 // use routes
 app.use("/user/login", login)
+app.use("/goods/type", goodsType)
 
 const port = process.env.PORT || 5000
 app.listen(port, () => {
