@@ -1,8 +1,15 @@
 import request from '@/utils/request'
 export default {
-    getGoodsList() {
+    // 根据typeid获取商品列表
+    getGoodsList(goodsTypeid) {
         return request({
-            url: '/goods/list',
+            url: `/goods/list/type/${goodsTypeid}`,
+            method: 'get'
+        })
+    },
+    getGoodsListAll() {
+        return request({
+            url: `/goods/list`,
             method: 'get'
         })
     },

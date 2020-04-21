@@ -5,6 +5,12 @@ const passport = require('passport')
 const app = express()
 
 const login = require("./routes/api/login")
+const goodsType = require('./routes/api/goods/type')
+const goodsList = require('./routes/api/goods/list')
+const goodsCard = require('./routes/api/goods/card')
+
+const pay = require('./routes/api/pay/pay')
+// const f2fpay = require('./routes/api/pay/f2fpay')
 
 // DB config
 const db = require("./config/keys").mongoURI
@@ -26,6 +32,14 @@ require('./config/passport')(passport)
 
 // use routes
 app.use("/user/login", login)
+app.use("/goods/type", goodsType)
+app.use("/goods/list", goodsList)
+app.use("/goods/card", goodsCard)
+
+
+
+app.use("/pay", pay)
+// app.use("/f2fpay", f2fpay)
 
 const port = process.env.PORT || 5000
 app.listen(port, () => {

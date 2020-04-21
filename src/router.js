@@ -6,6 +6,8 @@ import Admin from '@/views/admin'
 import Layout from '@/components/Layout'
 // 仪表盘
 import Home from '@/views/home'
+// 系统设置路由
+import Pay from '@/views/setting/pay'
 // 商品管理路由
 import GoodsType from '@/views/goods/type'
 import GoodsList from '@/views/goods/list'
@@ -50,6 +52,17 @@ export default new Router({
           path: '/',
           component: Home,
           meta: {title: "仪表盘"}
+        }
+      ]
+    },
+    {
+      path: '/pay',
+      component: Layout,
+      children: [
+        {
+          path: '/',
+          component: Pay,
+          meta: {title: "支付设置"}
         }
       ]
     },

@@ -1,3 +1,4 @@
+/* 商品分类 */
 const mongoose = require("mongoose")
 const Schema = mongoose.Schema
 
@@ -16,6 +17,10 @@ const GoodsTypeSchema = new Schema({
         type: Number,
         required:true,
         default: 1
+    },
+    typeid: {
+        type: Number,
+        required: true
     }
 })
 

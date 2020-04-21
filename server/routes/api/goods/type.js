@@ -1,52 +1,87 @@
 // goodstype
 const express = require("express");
 const router = express.Router();
-const passport =require('passport')
+const passport = require('passport')
 
 const goodsType = require("../../../models/goods/Type")
 
 const dbutils = require('../../../utils/db');
 
+
+// $route GET goods/type
+// @desc 获取商品分类数据接口 前台调用
+// @access public
+router.get("/", (req, res) => {
+
+    goodsType.find().then(data => {
+        var retData = [];
+        data.forEach(element => {
+            retData.push({
+                id: element._id,
+                status: element.status,
+                typeid: element.typeid,
+                typeName: element.typeName,
+                sort: element.sort
+            })
+        });
+
+        res.json({
+            code: 2000,
+            flag: true,
+            message: '查询成功',
+            data: retData
+        })
+    })
+})
+
 // $route POST goods/type
 // @desc 新增商品分类接口
 // @access private
-router.post("/", passport.authenticate('jwt', {session: false}),(req, res) => {
-    const goodsTypeFields = {};
-    if(req.body.typeName) goodsTypeFields.typeName = req.body.typeName;
-    if(req.body.status) goodsTypeFields.status = req.body.status;
-    if(req.body.sort) goodsTypeFields.sort = req.body.sort;
-    new goodsType(goodsTypeFields).save().then(data => {
-        res.json({
-            status: 2000,
-            flag: true,
-            message: '新增分类成功'
+router.post("/", passport.authenticate('jwt', {
+    session: false
+}), (req, res) => {
+    goodsType.find().then(data => {
+        const goodsTypeFields = {};
+        if (req.body.typeName) goodsTypeFields.typeName = req.body.typeName;
+        if (req.body.status) goodsTypeFields.status = req.body.status;
+        if (req.body.sort) goodsTypeFields.sort = req.body.sort;
+        goodsTypeFields.typeid = data.length + 1;
+        new goodsType(goodsTypeFields).save().then(data => {
+            res.json({
+                status: 2000,
+                flag: true,
+                message: '新增分类成功'
+            })
         })
-    })
+
+    });
+
 })
 
 // $route GET goods/type
 // @desc 获取商品分类数据接口
 // @access private
-router.get("/:currentPage/:pageSize", passport.authenticate('jwt', {session: false}),(req, res) => {
+router.get("/:currentPage/:pageSize", passport.authenticate('jwt', {
+    session: false
+}), (req, res) => {
     // console.log(req.params.currentPage);
-    
-    dbutils.pageQuery(req.params.currentPage,req.params.pageSize,goodsType,{},{},function(err, $data) {
+
+    dbutils.pageQuery(req.params.currentPage, req.params.pageSize, goodsType, {}, {}, function (err, $data) {
         // console.log(req.params.currentPage);
         // console.log(goodsType);
-        console.log($data);
-        
+
         var data = $data.results,
             retData = [];
         data.forEach(element => {
             retData.push({
                 id: element._id,
-                status:element.status,
+                status: element.status,
                 typeName: element.typeName,
                 sort: element.sort
             })
         });
         console.log(data.length);
-        
+
         res.json({
             code: 2000,
             flag: true,
@@ -56,7 +91,7 @@ router.get("/:currentPage/:pageSize", passport.authenticate('jwt', {session: fal
                 rows: retData
             }
         })
-    
+
     })
     // goodsType.find({}).limit(10).then(data => {
     //     var retData = [];
@@ -69,7 +104,7 @@ router.get("/:currentPage/:pageSize", passport.authenticate('jwt', {session: fal
     //         })
     //     });
     //     console.log(data.length);
-        
+
     //     res.json({
     //         code: 2000,
     //         flag: true,
@@ -85,7 +120,9 @@ router.get("/:currentPage/:pageSize", passport.authenticate('jwt', {session: fal
 // $route GET goods/type/:id
 // @desc 获取单条商品分类数据接口
 // @access private
-router.get("/:id", passport.authenticate('jwt', {session: false}),(req, res) => {
+router.get("/:id", passport.authenticate('jwt', {
+    session: false
+}), (req, res) => {
     goodsType.findById(req.params.id).then(data => {
         res.json({
             code: 2000,
@@ -102,9 +139,11 @@ router.get("/:id", passport.authenticate('jwt', {session: false}),(req, res) => 
 })
 
 // $route PUT goods/type/:id
-// @desc 获取单条商品分类数据接口
+// @desc 修改单条商品分类数据接口
 // @access private
-router.put("/:id", passport.authenticate('jwt', {session: false}),(req, res) => {
+router.put("/:id", passport.authenticate('jwt', {
+    session: false
+}), (req, res) => {
     goodsType.findById(req.params.id).then(data => {
         data.sort = req.body.sort;
         data.typeName = req.body.typeName
@@ -121,7 +160,9 @@ router.put("/:id", passport.authenticate('jwt', {session: false}),(req, res) => 
 // $route DELETE goods/type/:id
 // @desc 删除单条商品分类接口
 // @access private
-router.delete("/:id", passport.authenticate('jwt', {session: false}),(req, res) => {
+router.delete("/:id", passport.authenticate('jwt', {
+    session: false
+}), (req, res) => {
     goodsType.findById(req.params.id).then(data => {
         data.remove(() => {
             res.json({
