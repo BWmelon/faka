@@ -25,14 +25,15 @@
                     ></el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="购买数量" prop="count">
-                <el-input-number v-model="form.count" :min="1" :max="10"></el-input-number>
-            </el-form-item>
+
             <el-form-item label="库存" prop="stock">
                 <el-input placeholder="请选择商品" v-model="form.stock" :disabled="true"></el-input>
             </el-form-item>
             <el-form-item label="价格" prop="price">
                 <el-input placeholder="0" v-model="form.price" :disabled="true"></el-input>
+            </el-form-item>
+            <el-form-item label="购买数量" prop="amount">
+                <el-input-number v-model="form.amount" :min="1" :max="10" @change="getPayMoney"></el-input-number>
             </el-form-item>
             <el-form-item label="手机号" prop="phone">
                 <el-input v-model="form.phone"></el-input>
@@ -69,7 +70,8 @@ export default {
                 stock: 0,
                 radio: 1,
                 goodsName: null,
-                count: 1
+                amount: 1,
+                money: 0
             },
             rules: {
                 goodsType: [
@@ -93,17 +95,20 @@ export default {
                 phone: [
                     { required: true, message: "请输入手机号", trigger: "blur" }
                 ],
-                paytype: [
+                payType: [
                     {
                         required: true,
                         message: "请选择支付方式",
                         trigger: "change"
                     }
                 ]
-            },
+            }
         };
     },
     methods: {
+        getPayMoney() {
+            this.form.money = this.form.amount * this.form.price;
+        },
         onSubmit() {
             this.$refs["form"].validate(valid => {
                 if (valid) {
@@ -111,7 +116,12 @@ export default {
                         if (value.goodsName == this.form.goodsName) {
                             this.form.listid = value.id;
                         }
-                        this.launchPay();
+                    });
+                    console.log(this.form.money);
+                    
+                    payApi.launchPay(this.form).then(res => {
+                        const resp = res.data;
+                        window.open(resp.payUrl, "_blank");
                     });
                 } else {
                     console.log(0);
@@ -151,35 +161,16 @@ export default {
                     });
                 }
             });
-            // goodsCardApi.getGoodsNameByGoodsTypeId().then(res => {
-            //     const resp = res.data;
-            //     this.goodsNames = [];
-            //     if (resp.flag) {
-            //         resp.data.forEach(item => {
-            //             this.goodsNames.push({
-            //                 goodsName: item.goodsName,
-            //                 id: item.id
-            //             });
-            //         });
-            //     }
-            // });
         },
         getInfoByListid() {
-            console.log(this.form.goodsName);
-            console.log(this.goodsList);
             this.goodsList.forEach(item => {
                 if (item.goodsName == this.form.goodsName) {
                     this.form.price = item.price;
                     this.form.stock = item.stock;
                 }
             });
+            this.form.money = this.form.amount * this.form.price;
         },
-        launchPay() {
-            payApi.launchPay(this.form).then(res => {
-                const resp = res.data;
-                window.open(resp.payUrl, "_blank");
-            });
-        }
     }
 };
 </script>
