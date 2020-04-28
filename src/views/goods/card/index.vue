@@ -52,9 +52,27 @@
             <!-- <el-table-column label="日期" width="120">
         <template slot-scope="scope">{{ scope.row.time }}</template>
             </el-table-column>-->
-            <el-table-column prop="goodsName" label="商品名称" width="120"></el-table-column>
             <el-table-column prop="card" label="卡密" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="time" label="导入时间" show-overflow-tooltip></el-table-column>
+            <el-table-column
+                prop="status"
+                label="状态"
+                width="100"
+                :filters="[{ text: '已使用', value: 1 }, { text: '未使用', value: 0 }]"
+                :filter-method="filterTag"
+                filter-placement="bottom-end"
+            >
+                <template slot-scope="scope">
+                    <el-tag
+                        :type="scope.row.status === 0 ? 'primary' : 'success'"
+                        disable-transitions
+                    >{{scope.row.status == 0 ? '未使用' : '已使用'}}</el-tag>
+                </template>
+            </el-table-column>
+            <el-table-column prop="goodsName" label="商品名称" width="120"></el-table-column>
+            <el-table-column prop="importTime" label="导入时间" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="useTime" label="使用时间" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="out_trade_no" label="订单编号" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="phone" label="联系方式" show-overflow-tooltip></el-table-column>
             <el-table-column label="操作" width="280">
                 <template slot-scope="scope">
                     <el-button size="mini" type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
@@ -75,9 +93,6 @@
         <!-- dialog开始 -->
         <el-dialog title="卡密编辑" :visible.sync="dialogFormVisible" width="80%">
             <el-form :model="addCardForm" ref="addCardsForm" :rules="rules">
-                <!-- <el-form-item label="活动名称" :label-width="formLabelWidth">
-          <el-input v-model="form.name" autocomplete="off"></el-input>
-                </el-form-item>-->
                 <el-row>
                     <el-form-item label="商品分类" :label-width="formLabelWidth" prop="goodsType">
                         <el-col :span="14">
@@ -104,7 +119,11 @@
                     <el-form-item label="商品名称" :label-width="formLabelWidth" prop="goodsName">
                         <el-col :span="14">
                             <!-- <el-select v-model="goodsListForm.typeName" :value="nowTypeName" placeholder="请选择商品分类"> -->
-                            <el-select v-model="addCardForm.goodsListid" placeholder="请选择商品" @change="getGoodsName">
+                            <el-select
+                                v-model="addCardForm.listid"
+                                placeholder="请选择商品"
+                                @change="getGoodsName"
+                            >
                                 <el-option
                                     v-for="item in goodsNameByTypeId"
                                     :label="item.goodsName"
@@ -170,7 +189,7 @@ export default {
             addCardForm: {
                 goodsType: null,
                 goodsName: null,
-                goodsListid: null,
+                listid: null,
                 cards: ""
             },
             rules: {
@@ -181,7 +200,7 @@ export default {
                         trigger: "change"
                     }
                 ],
-                goodsListid: [
+                listid: [
                     { required: true, message: "请选择商品", trigger: "change" }
                 ],
                 cards: [
@@ -258,7 +277,7 @@ export default {
         // 根据商品id获取商品值
         getGoodsName() {
             this.goodsNameByTypeId.forEach(value => {
-                if(value.value ==  this.addCardForm.goodsListid) {
+                if (value.value == this.addCardForm.listid) {
                     this.addCardForm.goodsName = value.goodsName;
                 }
             });
@@ -349,15 +368,14 @@ export default {
         },
         // 在添加卡密弹窗中根据已选择商品分类获取该分类下的商品
         getGoodsNameByGoodsTypeId(id) {
-			
-			this.nowAddCardGoodsTypeId = this.addCardForm.goodsType;
-			// console.log(this.nowAddCardGoodsTypeId);
-			
-			this.goodsNameByTypeId = [];
-			goodsListApi.getGoodsList(this.nowAddCardGoodsTypeId).then(res => {
-				const resp = res.data;
-                
-				if (resp.flag) {
+            this.nowAddCardGoodsTypeId = this.addCardForm.goodsType;
+            // console.log(this.nowAddCardGoodsTypeId);
+
+            this.goodsNameByTypeId = [];
+            goodsListApi.getGoodsList(this.nowAddCardGoodsTypeId).then(res => {
+                const resp = res.data;
+
+                if (resp.flag) {
                     resp.data.forEach(item => {
                         this.goodsNameByTypeId.push({
                             id: item.id,
@@ -367,8 +385,7 @@ export default {
                     });
                 }
                 console.log(this.goodsNameByTypeId);
-                
-			});
+            });
         },
         handleChangGoodName() {
             if (this.nowGoodsNameId == "所有商品") {
@@ -424,6 +441,9 @@ export default {
                     });
                 }
             });
+        },
+        filterTag(value, row) {
+            return row.status === value;
         }
     }
 };

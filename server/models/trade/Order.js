@@ -4,9 +4,14 @@ const Schema = mongoose.Schema
 
 // Create Schema
 const orderSchema= new Schema({
-    orderNo: {
+    out_trade_no: {
         type: String,
         required: true
+    },
+    trade_no: {
+        type: String,
+        required: true,
+        default: ''
     },
     orderTime: {
         type: Date,
@@ -23,6 +28,14 @@ const orderSchema= new Schema({
     },
     goodsName: {
         type: String,
+        required: true
+    },
+    out_trade_no: {
+        type: String,
+        default: '',
+    },
+    listid: {
+        type: Number,
         required: true
     },
     money: {

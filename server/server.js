@@ -9,7 +9,7 @@ const goodsType = require('./routes/api/goods/type')
 const goodsList = require('./routes/api/goods/list')
 const goodsCard = require('./routes/api/goods/card')
 
-const order = require('./routes/api/setting/order')
+const order = require('./routes/api/trade/order')
 
 const pay = require('./routes/api/pay/pay')
 // const f2fpay = require('./routes/api/pay/f2fpay')
@@ -38,7 +38,7 @@ app.use("/goods/type", goodsType)
 app.use("/goods/list", goodsList)
 app.use("/goods/card", goodsCard)
 
-app.use("/setting/order", order)
+app.use("/trade/order", order)
 
 
 

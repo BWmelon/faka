@@ -67,8 +67,9 @@ router.post("/", (req, res) => {
             // 生成订单
             let orderInfo = new Order();
 
-            let orderNo = creatOrderNo();
-            orderInfo.orderNo = orderNo;
+            let out_trade_no = creatOrderNo();
+            orderInfo.out_trade_no = out_trade_no;
+            orderInfo.trade_no = '0';
             orderInfo.payTime = '0';
             orderInfo.status = 0; // 0未支付，1已支付
             orderInfo.goodsName = req.body.goodsName;
@@ -76,8 +77,11 @@ router.post("/", (req, res) => {
             orderInfo.amount = req.body.amount;
             orderInfo.payType = req.body.paytype;
             orderInfo.phone = req.body.phone;
+            orderInfo.listid = req.body.listid;
             // 保存订单
             orderInfo.save((err) => {
+                console.log(err);
+                
                 if (!err) {
                     const easypayConfig = {
                         domain: data.url,
@@ -89,15 +93,15 @@ router.post("/", (req, res) => {
                     const easypay = new Easypay(easypayConfig);
                     const payConfig = {
                         type: req.body.paytype,
-                        out_trade_no: orderNo,
-                        notify_url: 'http://127.0.0.1:5000/setting/order',
-                        return_url: 'http://localhost:8888/query',
+                        out_trade_no: out_trade_no,
+                        notify_url: 'http://127.0.0.1:5000/trade/order/notify',
+                        return_url: 'http://localhost:8888/index/query',
                         name: req.body.goodsName,
                         money: req.body.money,
                         sitename: '网站名称'
                     };
                     let payUrl = easypay.pay(payConfig);
-                    
+
                     res.json({
                         status: 2000,
                         payUrl

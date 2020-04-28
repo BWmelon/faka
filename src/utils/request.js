@@ -1,6 +1,8 @@
 import axios from 'axios'
 import router from '@/router'
 import Vue from 'Vue'
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
 
 import {Message} from 'element-ui';
 
@@ -16,11 +18,7 @@ let loading;
 
 // 请求拦截器
 request.interceptors.request.use(config => {
-    loading = Vue.prototype.$loading({
-        lock: true,
-        text: "加载中...",
-        background: "rgba(0, 0, 0, 0.8)"
-    });
+        NProgress.start();
     var token = localStorage.getItem('faka-token');
     if(token) {
         config.headers.common['Authorization'] = token;
@@ -34,7 +32,7 @@ request.interceptors.request.use(config => {
 
 // 响应拦截器   
 request.interceptors.response.use(response => {
-    loading.close();
+    NProgress.done();
     return response;
     // 响应拦截
 }, error => {

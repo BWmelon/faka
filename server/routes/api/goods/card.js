@@ -9,7 +9,6 @@ const goodsList = require("../../../models/goods/List")
 const dbutils = require('../../../utils/db');
 // $route GET goods/card
 // @desc 获取所有未出售卡密
-
 // @access private
 router.get("/:currentPage/:pageSize", passport.authenticate('jwt', {
     session: false
@@ -22,10 +21,13 @@ router.get("/:currentPage/:pageSize", passport.authenticate('jwt', {
         data.forEach(element => {
             retData.push({
                 id: element._id,
-                goodsName: element.goodsName,
-                status: element.status,
                 card: element.card,
-                time: element.time
+                status: element.status,
+                goodsName: element.goodsName,
+                importTime: element.importTime,
+                useTime: element.useTime,
+                out_trade_no: element.out_trade_no,
+                phone: element.phone
             })
         });
 
@@ -58,7 +60,7 @@ router.post("/", passport.authenticate('jwt', {
             cardsArr.forEach(item => {
                 arr.push({
                     goodsName: req.body.goodsName,
-                    listid: req.body.goodsListid,
+                    listid: req.body.listid,
                     card: item
                 });
             });
@@ -66,9 +68,9 @@ router.post("/", passport.authenticate('jwt', {
         }
         goodsCard.insertMany(arr).then(data => {
             goodsCard.find({
-                listid: req.body.goodsListid
+                listid: req.body.listid
             }).then(data => {
-                goodsList.findOne({listid: req.body.goodsListid}).then(resp => {
+                goodsList.findOne({listid: req.body.listid}).then(resp => {
                     resp.stock = data.length
                     resp.save(() => {
                         res.json({
