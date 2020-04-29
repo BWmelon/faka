@@ -1,6 +1,11 @@
 <template>
-    <div>
-        <el-form
+<div>
+        <el-card class="box-card" style="width: 500px;">
+            <div slot="header" class="clearfix">
+                <span><i class="el-icon-search"></i> 查询订单</span>
+                <el-button style="float: right; padding: 3px 0" type="text" @click="$router.replace('/index/purchase')">在线下单</el-button>
+            </div>
+            <el-form
             ref="form"
             :model="form"
             label-width="80px"
@@ -16,6 +21,7 @@
             </el-form-item>
         </el-form>
         <router-view></router-view>
+        </el-card>
     </div>
 </template>
 

@@ -22,6 +22,8 @@
           <span>系统设置</span>
         </template>
           <el-menu-item index="/pay">支付设置</el-menu-item>
+          <el-menu-item index="/account">账户设置</el-menu-item>
+          <el-menu-item index="/notice">通知公告</el-menu-item>
       </el-submenu>
       <el-submenu index="2">
         <template slot="title">

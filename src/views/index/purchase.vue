@@ -1,53 +1,65 @@
 <template>
-    <el-form ref="form" :model="form" label-width="80px" :rules="rules">
-        <el-form-item label="商品分类" prop="goodsType">
-            <el-select
-                v-model="form.goodsType"
-                placeholder="请选择商品分类"
-                @change="getGoodsListByGoodsTypeId"
-            >
-                <el-option
-                    v-for="option in goodsTypes"
-                    :key="option.id"
-                    :label="option.goodsType"
-                    :value="option.typeid"
-                ></el-option>
-            </el-select>
-        </el-form-item>
-        <el-form-item label="商品名称" prop="goodsName">
-            <el-select v-model="form.goodsName" placeholder="请选择商品" @change="getInfoByListid">
-                <el-option
-                    v-for="option in goodsList"
-                    :key="option.listid"
-                    :label="option.goodsName"
-                    :value="option.goodsName"
-                ></el-option>
-            </el-select>
-        </el-form-item>
+    <div>
+        <el-card class="box-card" style="width: 500px;">
+            <div slot="header" class="clearfix">
+                <span><i class="el-icon-shopping-cart-1"></i> 在线下单</span>
+                <el-button style="float: right; padding: 3px 0" type="text" @click="$router.replace('/index/query')">查询订单</el-button>
+            </div>
+            <el-form ref="form" :model="form" label-width="80px" :rules="rules" :hide-required-asterisk="true">
+                <el-form-item label="商品分类" prop="goodsType">
+                    <el-select
+                        v-model="form.goodsType"
+                        placeholder="请选择商品分类"
+                        @change="getGoodsListByGoodsTypeId"
+                    >
+                        <el-option
+                            v-for="option in goodsTypes"
+                            :key="option.id"
+                            :label="option.goodsType"
+                            :value="option.typeid"
+                        ></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="商品名称" prop="goodsName">
+                    <el-select
+                        v-model="form.goodsName"
+                        placeholder="请选择商品"
+                        @change="getInfoByListid"
+                    >
+                        <el-option
+                            v-for="option in goodsList"
+                            :key="option.listid"
+                            :label="option.goodsName"
+                            :value="option.goodsName"
+                        ></el-option>
+                    </el-select>
+                </el-form-item>
 
-        <el-form-item label="库存" prop="stock">
-            <el-input placeholder="请选择商品" v-model="form.stock" :disabled="true"></el-input>
-        </el-form-item>
-        <el-form-item label="价格" prop="price">
-            <el-input placeholder="0" v-model="form.price" :disabled="true"></el-input>
-        </el-form-item>
-        <el-form-item label="购买数量" prop="amount">
-            <el-input-number v-model="form.amount" :min="1" :max="10" @change="getPayMoney"></el-input-number>
-        </el-form-item>
-        <el-form-item label="手机号" prop="phone">
-            <el-input v-model="form.phone"></el-input>
-        </el-form-item>
-        <el-form-item label="付款方式" prop="paytype">
-            <el-radio-group v-model="form.paytype">
-                <el-radio label="wxpay" v-model="form.radio">微信</el-radio>
-                <el-radio label="alipay" v-model="form.radio">支付宝</el-radio>
-                <el-radio label="qqpay" v-model="form.radio">QQ钱包</el-radio>
-            </el-radio-group>
-        </el-form-item>
-        <el-form-item>
-            <el-button type="primary" @click="onSubmit">提交订单</el-button>
-        </el-form-item>
-    </el-form>
+                <el-form-item label="商品库存" prop="stock">
+                    <el-input placeholder="请选择商品" v-model="form.stock" :disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item label="商品单价" prop="price">
+                    <el-input placeholder="0" v-model="form.price" :disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item label="购买数量" prop="amount">
+                    <el-input-number v-model="form.amount" :min="1" :max="10" @change="getPayMoney"></el-input-number>
+                </el-form-item>
+                <el-form-item label="联系方式" prop="phone">
+                    <el-input v-model="form.phone"></el-input>
+                </el-form-item>
+                <el-form-item label="付款方式" prop="paytype">
+                    <el-radio-group v-model="form.paytype">
+                        <el-radio label="wxpay" v-model="form.radio">微信</el-radio>
+                        <el-radio label="alipay" v-model="form.radio">支付宝</el-radio>
+                        <el-radio label="qqpay" v-model="form.radio">QQ钱包</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="onSubmit">提交订单</el-button>
+                </el-form-item>
+            </el-form>
+        </el-card>
+    </div>
 </template>
 
 <script>
@@ -116,7 +128,7 @@ export default {
                         }
                     });
                     console.log(this.form.money);
-                    
+
                     payApi.launchPay(this.form).then(res => {
                         const resp = res.data;
                         window.open(resp.payUrl, "_blank");
@@ -168,10 +180,18 @@ export default {
                 }
             });
             this.form.money = this.form.amount * this.form.price;
-        },
+        }
     }
 };
 </script>
 
 <style scoped>
+.el-select {
+    display: block;
+}
+
+.el-input-number {
+    display: block;
+    width: 100%;
+}
 </style>

@@ -35,7 +35,7 @@ export default {
                     localStorage.removeItem("faka-user");
                     this.$router.push("admin");
                     this.$message({
-                        message: '账号已退出',
+                        message: "账号已退出",
                         type: "success"
                     });
 

@@ -13,6 +13,8 @@ import Layout from '@/components/Layout'
 import Home from '@/views/home'
 // 系统设置路由
 import Pay from '@/views/setting/pay'
+import Account from '@/views/setting/account'
+import Notice from '@/views/setting/notice'
 // 商品管理路由
 import GoodsType from '@/views/goods/type'
 import GoodsList from '@/views/goods/list'
@@ -83,6 +85,28 @@ export default new Router({
 				component: Pay,
 				meta: {
 					title: "支付设置"
+				}
+			}]
+		},
+		{
+			path: '/account',
+			component: Layout,
+			children: [{
+				path: '/',
+				component: Account,
+				meta: {
+					title: "账号设置"
+				}
+			}]
+		},
+		{
+			path: '/notice',
+			component: Layout,
+			children: [{
+				path: '/',
+				component: Notice,
+				meta: {
+					title: "通知公告"
 				}
 			}]
 		},

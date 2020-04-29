@@ -3,7 +3,7 @@ const mongoose = require("mongoose")
 const Schema = mongoose.Schema
 
 // Create Schema
-const PaySchema= new Schema({
+const PaySchema = new Schema({
     payType: {
         type: String,
         required: true
@@ -22,4 +22,4 @@ const PaySchema= new Schema({
     }
 })
 
-module.exports = Pay= mongoose.model("pay", PaySchema, "pay")
+module.exports = Pay = mongoose.model("pay", PaySchema, "pay")
