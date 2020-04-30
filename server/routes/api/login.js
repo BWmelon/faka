@@ -5,7 +5,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const keys = require('../../config/keys');
 const passport =require('passport')
-// var token = jwt.sign({ foo: 'bar' }, 'shhhhh');
 
 const Login = require("../../models/Login")
 
@@ -16,14 +15,6 @@ router.post("/", (req, res) => {
     const username = req.body.username
     const password = req.body.password
 
-    // bcrypt.genSalt(10, function(err, salt) {
-    //     bcrypt.hash(password, salt, function(err, hash) {
-    //         // Store hash in your password DB.
-    //         if(err) throw err;
-    //         console.log(hash);
-
-    //     });
-    // });
     Login.findOne({
             username
         })
@@ -48,7 +39,7 @@ router.post("/", (req, res) => {
                             jwt.sign(rule, keys.serectOrKey,{expiresIn: 3600},(err, token)=> {
                                 if(err) throw err;
                                 
-                                res.json({
+                                 res.json({
                                     "code": 2000,
                                     "flag": true,
                                     "message": "登录成功",

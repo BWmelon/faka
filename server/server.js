@@ -15,6 +15,7 @@ const pay = require('./routes/api/pay/pay')
 
 
 const notice = require('./routes/api/setting/notice')
+const info = require('./routes/api/setting/info')
 // const f2fpay = require('./routes/api/pay/f2fpay')
 
 // DB config
@@ -42,6 +43,7 @@ app.use("/goods/list", goodsList)
 app.use("/goods/card", goodsCard)
 
 app.use("/setting/notice", notice)
+app.use("/setting/info", info)
 
 app.use("/trade/order", order)
 

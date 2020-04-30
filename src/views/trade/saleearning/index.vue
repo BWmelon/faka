@@ -1,15 +1,11 @@
 <template>
-    <div>
-        saleearning
-    </div>
+  <div>
+    saleearning
+  </div>
 </template>
 
 <script>
-export default {
-    
-}
+export default {};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

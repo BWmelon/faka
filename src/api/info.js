@@ -1,16 +1,17 @@
 import request from "@/utils/request";
 export default {
-  // 添加通知公告
-  addNotices(data) {
+  // 更新商户信息
+  updateInfo(data) {
     return request({
-      url: "/setting/notice",
+      url: "/setting/info",
       method: "post",
       data
     });
   },
-  getNotices() {
+  // 获取商户信息
+  getInfo() {
     return request({
-      url: "/setting/notice",
+      url: "/setting/info",
       method: "get"
     });
   }

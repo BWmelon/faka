@@ -2,13 +2,33 @@
   <div>
     <!-- 表格开始 -->
     <el-table :data="cardList" height="700" border style="width: 100%">
-      <el-table-column prop="orderid" label="订单编号" width="180"></el-table-column>
-      <el-table-column prop="paytime" label="支付时间" width="180"></el-table-column>
+      <el-table-column
+        prop="orderid"
+        label="订单编号"
+        width="180"
+      ></el-table-column>
+      <el-table-column
+        prop="paytime"
+        label="支付时间"
+        width="180"
+      ></el-table-column>
       <el-table-column prop="goodstype" label="商品类型"></el-table-column>
       <el-table-column prop="goodsname" label="商品名称"></el-table-column>
-      <el-table-column prop="paytype" label="支付方式" width="80"></el-table-column>
-      <el-table-column prop="linktype" label="联系方式" width="80"></el-table-column>
-      <el-table-column prop="phone" label="手机号" width="120"></el-table-column>
+      <el-table-column
+        prop="paytype"
+        label="支付方式"
+        width="80"
+      ></el-table-column>
+      <el-table-column
+        prop="linktype"
+        label="联系方式"
+        width="80"
+      ></el-table-column>
+      <el-table-column
+        prop="phone"
+        label="手机号"
+        width="120"
+      ></el-table-column>
       <el-table-column prop="cards" label="卡密" width="180"></el-table-column>
     </el-table>
     <!-- 表格结束 -->
@@ -70,5 +90,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

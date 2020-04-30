@@ -1,15 +1,11 @@
 <template>
-    <div>
-        accountlog
-    </div>
+  <div>
+    accountlog
+  </div>
 </template>
 
 <script>
-export default {
-    
-}
+export default {};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

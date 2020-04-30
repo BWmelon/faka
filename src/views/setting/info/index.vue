@@ -1,18 +1,21 @@
 <template>
   <div>
-    <p>修改密码</p>
-    <el-form ref="form" :model="form" label-width="80px" :rules="rules">
-      <el-form-item label="管理员账号" prop="username">
-        <el-input v-model="form.username"></el-input>
+    <p>商户信息</p>
+    <el-form
+      ref="form"
+      :model="form"
+      label-width="80px"
+      :rules="rules"
+      :hide-required-asterisk="true"
+    >
+      <el-form-item label="店铺名称" prop="name">
+        <el-input v-model="form.name"></el-input>
       </el-form-item>
-      <el-form-item label="原密码" prop="oldPassword">
-        <el-input v-model="form.oldPassword"></el-input>
+      <el-form-item label="店铺地址" prop="url">
+        <el-input v-model="form.url"></el-input>
       </el-form-item>
-      <el-form-item label="新密码" prop="newPassword">
-        <el-input v-model="form.newPassword"></el-input>
-      </el-form-item>
-      <el-form-item label="重复新密码" prop="newPassword2">
-        <el-input v-model="form.newPassword2"></el-input>
+      <el-form-item label="商家QQ" prop="qq">
+        <el-input v-model="form.qq"></el-input>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="onSubmit">修改</el-button>
@@ -22,35 +25,34 @@
 </template>
 
 <script>
-import pay from "@/api/pay";
+import infoApi from "@/api/info";
 export default {
   data() {
     return {
       form: {
-        payType: "easypay",
+        name: "",
         url: "",
-        id: "",
-        key: ""
+        qq: ""
       },
       rules: {
+        name: [
+          {
+            required: true,
+            message: "请输入店铺名称",
+            trigger: "blur"
+          }
+        ],
         url: [
           {
             required: true,
-            message: "请输入api地址",
+            message: "请输入店铺地址",
             trigger: "blur"
           }
         ],
-        id: [
+        qq: [
           {
             required: true,
-            message: "请输入对接id",
-            trigger: "blur"
-          }
-        ],
-        key: [
-          {
-            required: true,
-            message: "请输入对接密钥",
+            message: "请输入商家qq",
             trigger: "blur"
           }
         ]
@@ -58,8 +60,8 @@ export default {
     };
   },
   methods: {
-    getPayInfo() {
-      pay.getPayInfo().then(res => {
+    getInfo() {
+      infoApi.getInfo().then(res => {
         const resp = res.data;
         if (resp.flag) {
           this.form = resp.data;
@@ -70,18 +72,19 @@ export default {
     onSubmit() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          pay.updatePayType(this.form).then(data => {
+          infoApi.updateInfo(this.form).then(data => {
             this.$message({
               type: "success",
               message: data.data.message
             });
+            this.getInfo();
           });
         }
       });
     }
   },
   created() {
-    this.getPayInfo();
+    this.getInfo();
   }
 };
 </script>
