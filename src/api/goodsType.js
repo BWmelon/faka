@@ -37,7 +37,7 @@ export default {
       data
     });
   },
-  delete(id) {
+  deleteOneById(id) {
     return request({
       url: `/goods/type/${id}`,
       method: "delete"

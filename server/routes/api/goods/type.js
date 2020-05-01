@@ -4,6 +4,8 @@ const router = express.Router();
 const passport = require('passport')
 
 const goodsType = require("../../../models/goods/Type")
+const goodsList = require("../../../models/goods/List")
+const goodsCard = require("../../../models/goods/Card")
 
 const dbutils = require('../../../utils/db');
 
@@ -12,7 +14,6 @@ const dbutils = require('../../../utils/db');
 // @desc 获取商品分类数据接口 前台调用
 // @access public
 router.get("/", (req, res) => {
-
     goodsType.find().then(data => {
         var retData = [];
         data.forEach(element => {
@@ -64,11 +65,8 @@ router.post("/", passport.authenticate('jwt', {
 router.get("/:currentPage/:pageSize", passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
-    // console.log(req.params.currentPage);
 
     dbutils.pageQuery(req.params.currentPage, req.params.pageSize, goodsType, {}, {}, function (err, $data) {
-        // console.log(req.params.currentPage);
-        // console.log(goodsType);
 
         var data = $data.results,
             retData = [];
@@ -80,7 +78,6 @@ router.get("/:currentPage/:pageSize", passport.authenticate('jwt', {
                 sort: element.sort
             })
         });
-        console.log(data.length);
 
         res.json({
             code: 2000,
@@ -93,28 +90,6 @@ router.get("/:currentPage/:pageSize", passport.authenticate('jwt', {
         })
 
     })
-    // goodsType.find({}).limit(10).then(data => {
-    //     var retData = [];
-    //     data.forEach(element => {
-    //         retData.push({
-    //             id: element._id,
-    //             status:element.status,
-    //             typeName: element.typeName,
-    //             sort: element.sort
-    //         })
-    //     });
-    //     console.log(data.length);
-
-    //     res.json({
-    //         code: 2000,
-    //         flag: true,
-    //         message: '查询成功',
-    //         data: {
-    //             total: data.length,
-    //             rows: retData
-    //         }
-    //     })
-    // })
 })
 
 // $route GET goods/type/:id
@@ -145,14 +120,22 @@ router.put("/:id", passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     goodsType.findById(req.params.id).then(data => {
+        data.status = req.body.status;
         data.sort = req.body.sort;
         data.typeName = req.body.typeName
         data.save(() => {
-            res.json({
-                code: 2000,
-                flag: true,
-                message: '修改成功'
+            goodsList.find({typeid: data.typeid}).then(lists => {
+                lists.forEach(item =>{
+                    item.status = req.body.status;
+                    item.save();
+                });
+                res.json({
+                    code: 2000,
+                    flag: true,
+                    message: '修改成功'
+                })
             })
+            
         })
     })
 })
@@ -165,23 +148,17 @@ router.delete("/:id", passport.authenticate('jwt', {
 }), (req, res) => {
     goodsType.findById(req.params.id).then(data => {
         data.remove(() => {
-            res.json({
-                code: 2000,
-                flag: true,
-                message: '删除成功'
+            goodsList.deleteMany({typeid: data.typeid}).then(() => {
+                goodsCard.deleteMany({typeid: data.typeid}).then(() => {
+                    res.json({
+                        code: 2000,
+                        flag: true,
+                        message: '商品分类删除成功'
+                    })
+                })
             })
         })
     })
 })
-
-// $route GET user/login/current
-// @desc return current user
-// @access private
-// router.get("/info", passport.authenticate('jwt', {session: false}), (req, res) => {
-//     res.json({
-//         id: req.user.id,
-//         username: req.user.username
-//     })
-// })
 
 module.exports = router

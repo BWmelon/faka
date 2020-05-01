@@ -37,6 +37,10 @@ const GoodsCardSchema = new Schema({
         required: true,
         default: ' '
     },
+    typeid: {
+        type: Number,
+        required: true
+    },
     listid: {
         type: Number,
         required: true

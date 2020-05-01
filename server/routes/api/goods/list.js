@@ -3,7 +3,9 @@ const express = require("express");
 const router = express.Router();
 const passport = require('passport')
 
+const goodsType = require("../../../models/goods/Type")
 const goodsList = require("../../../models/goods/List")
+const goodsCard = require("../../../models/goods/Card")
 
 const dbutils = require('../../../utils/db');
 
@@ -11,9 +13,11 @@ const dbutils = require('../../../utils/db');
 // @desc 根据分类id获取商品列表 前台调用
 // @access public
 router.get("/type/:typeid", (req, res) => {
-    goodsList.find({typeid: req.params.typeid}).then(data => {
+    goodsList.find({
+        typeid: req.params.typeid
+    }).then(data => {
         var retData = [];
-        
+
         data.forEach(element => {
             retData.push({
                 id: element._id,
@@ -35,7 +39,6 @@ router.get("/type/:typeid", (req, res) => {
         })
     })
 })
-
 
 // $route GET goods/id
 // @desc 根据商品分类id获取商品列表
@@ -87,19 +90,31 @@ router.put("/:id", passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     goodsList.findById(req.params.id).then(data => {
-        console.log(data.length);
-        
         data.status = req.body.status;
         data.sort = req.body.sort;
         data.price = req.body.price;
         data.typeName = req.body.typeName;
         data.goodsName = req.body.goodsName;
-        
+
         data.save(() => {
-            res.json({
-                code: 2000,
-                flag: true,
-                message: '修改成功'
+
+            goodsList.find({
+                status: 1
+            }).then(data => {
+                // 有商品为上架状态时将商品分类设置为上架状态,没有上架状态将商品分类设置为下架状态
+                goodsType.updateOne({
+                    typeid: req.body.typeid
+                }, {
+                    $set: {
+                        status: data.length ? 1 : 0
+                    }
+                }).then(() => {
+                    res.json({
+                        code: 2000,
+                        flag: true,
+                        message: '修改成功'
+                    })
+                })
             })
         });
     })
@@ -173,13 +188,18 @@ router.delete("/:id", passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
     goodsList.findById(req.params.id).then(data => {
-        data.remove(() =>{
-            res.json({
-                status: 2000,
-                flag: true,
-                message: '商品删除成功'
+        const listid = data.listid;
+        goodsCard.deleteMany({
+            listid
+        }).then(() => {
+            data.remove(() => {
+                res.json({
+                    status: 2000,
+                    flag: true,
+                    message: '商品删除成功'
+                })
             })
-        } )
+        })
     })
 })
 

@@ -30,21 +30,8 @@
                     <li>
                         <span>商家QQ</span>
                         {{ info.qq }}
-                        <a
-                            target="_blank"
-                            :href="
-                'http://wpa.qq.com/msgrd?v=3&uin=' +
-                  info.qq +
-                  '&site=qq&menu=yes'
-              "
-                            style="vertical-align: middle;"
-                        >
-                            <img
-                                border="0"
-                                :src="'http://wpa.qq.com/pa?p=2:' + info.qq + ':51'"
-                                alt="点击这里给我发消息"
-                                title="点击这里给我发消息"
-                            />
+                        <a target="_blank" :href="'http://wpa.qq.com/msgrd?v=3&uin=' + info.qq +'&site=qq&menu=yes'" style="vertical-align: middle;">
+                            <img border="0" src="http://pub.idqqimg.com/qconn/wpa/button/button_111.gif" alt="点击这里给我发消息" title="点击这里给我发消息"/>
                         </a>
                     </li>
                     <li>
@@ -67,7 +54,7 @@ export default {
             notices: [],
             info: {
                 name: "",
-                url: "",
+                url: "12345",
                 qq: ""
             }
         };
@@ -144,6 +131,7 @@ ul {
 }
 .info {
     margin-top: 20px;
+    height: 100%;
 }
 .info-item {
     font-size: 14px;
@@ -178,6 +166,7 @@ ul {
 }
 .qrcode {
     display: inline-block;
+    vertical-align: top;
 }
 .qrcode img {
     width: 132px;
