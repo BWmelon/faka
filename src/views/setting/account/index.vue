@@ -1,88 +1,93 @@
 <template>
-  <div>
-    <p>修改密码</p>
-    <el-form ref="form" :model="form" label-width="80px" :rules="rules">
-      <el-form-item label="管理员账号" prop="username">
-        <el-input v-model="form.username"></el-input>
-      </el-form-item>
-      <el-form-item label="原密码" prop="oldPassword">
-        <el-input v-model="form.oldPassword"></el-input>
-      </el-form-item>
-      <el-form-item label="新密码" prop="newPassword">
-        <el-input v-model="form.newPassword"></el-input>
-      </el-form-item>
-      <el-form-item label="重复新密码" prop="newPassword2">
-        <el-input v-model="form.newPassword2"></el-input>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="onSubmit">修改</el-button>
-      </el-form-item>
-    </el-form>
-  </div>
+    <div>
+        <p>修改密码</p>
+        <el-form
+            ref="form"
+            :model="form"
+            label-width="100px"
+            :rules="rules"
+            :hide-required-asterisk="true"
+        >
+            <el-form-item label="原密码" prop="oldPassword">
+                <el-input v-model="form.oldPassword"></el-input>
+            </el-form-item>
+            <el-form-item label="新账号" prop="username">
+                <el-input v-model="form.username"></el-input>
+            </el-form-item>
+            <el-form-item label="新密码" prop="newPassword">
+                <el-input type="password" v-model="form.newPassword" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="确认新密码" prop="checkPassword">
+                <el-input type="password" v-model="form.checkPassword" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="onSubmit">修改</el-button>
+            </el-form-item>
+        </el-form>
+    </div>
 </template>
 
 <script>
-import pay from "@/api/pay";
+import { changeAccount } from "@/api/login";
 export default {
-  data() {
-    return {
-      form: {
-        payType: "easypay",
-        url: "",
-        id: "",
-        key: ""
-      },
-      rules: {
-        url: [
-          {
-            required: true,
-            message: "请输入api地址",
-            trigger: "blur"
-          }
-        ],
-        id: [
-          {
-            required: true,
-            message: "请输入对接id",
-            trigger: "blur"
-          }
-        ],
-        key: [
-          {
-            required: true,
-            message: "请输入对接密钥",
-            trigger: "blur"
-          }
-        ]
-      }
-    };
-  },
-  methods: {
-    getPayInfo() {
-      pay.getPayInfo().then(res => {
-        const resp = res.data;
-        if (resp.flag) {
-          this.form = resp.data;
-        }
-      });
+    data() {
+        var validatePass2 = (rule, value, callback) => {
+            if (value === "") {
+                callback(new Error("请再次输入密码"));
+            } else if (value !== this.form.newPassword) {
+                callback(new Error("两次输入密码不一致!"));
+            } else {
+                callback();
+            }
+        };
+        return {
+            form: {
+                username: "",
+                oldPassword: "",
+                newPassword: "",
+                checkPassword: ""
+            },
+            rules: {
+                username: [
+                    {
+                        required: true,
+                        message: "请输入管理员账号",
+                        trigger: "blur"
+                    }
+                ],
+                oldPassword: [
+                    {
+                        required: true,
+                        message: "请输入原密码",
+                        trigger: "blur"
+                    }
+                ],
+                newPassword: [
+                    {
+                        required: true,
+                        message: "请输入新密码",
+                        trigger: "blur"
+                    }
+                ],
+                checkPassword: [{ validator: validatePass2, trigger: "blur" }]
+            }
+        };
     },
-
-    onSubmit() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          pay.updatePayType(this.form).then(data => {
-            this.$message({
-              type: "success",
-              message: data.data.message
+    methods: {
+        onSubmit() {
+            this.$refs["form"].validate(valid => {
+                if (valid) {
+                    changeAccount(this.form).then(data => {
+                        const resp = data.data;
+                        this.$message({
+                            type: resp.flag ? "success" : "error",
+                            message: resp.message
+                        });
+                    });
+                }
             });
-          });
         }
-      });
     }
-  },
-  created() {
-    this.getPayInfo();
-  }
 };
 </script>
 

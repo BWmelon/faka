@@ -1,5 +1,12 @@
 import request from "@/utils/request";
 
+export function isinitialized() {
+  return request({
+    url: "/user/login",
+    method: "get"
+  });
+}
+
 export function login(username, password) {
   return request({
     url: "/user/login",
@@ -18,5 +25,13 @@ export function getUserInfo(token) {
     headers: {
       Authorization: token
     }
+  });
+}
+
+export function changeAccount(data) {
+  return request({
+    url: `/user/login`,
+    method: "put",
+    data
   });
 }

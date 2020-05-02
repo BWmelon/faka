@@ -71,11 +71,11 @@
                     >{{ scope.row.status == 0 ? "未使用" : "已使用" }}</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column prop="goodsName" label="商品名称" width="120"></el-table-column>
-            <el-table-column prop="importTime" label="导入时间" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="useTime" label="使用时间" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="out_trade_no" label="订单编号" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="phone" label="联系方式" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="goodsName" label="商品名称" show-overflow-tooltip width="120"></el-table-column>
+            <el-table-column prop="importTime" label="导入时间" show-overflow-tooltip width="220"></el-table-column>
+            <el-table-column prop="useTime" label="使用时间" show-overflow-tooltip width="220"></el-table-column>
+            <el-table-column prop="out_trade_no" label="订单编号" show-overflow-tooltip width="220"></el-table-column>
+            <el-table-column prop="phone" label="联系方式" show-overflow-tooltip width="180"></el-table-column>
             <el-table-column label="操作" width="280">
                 <template slot-scope="scope">
                     <el-button size="mini" type="danger" @click="handleDelete(scope.row.id)">删除</el-button>

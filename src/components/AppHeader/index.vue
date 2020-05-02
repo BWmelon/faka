@@ -33,7 +33,7 @@ export default {
     handleCommand(command) {
       switch (command) {
         case "a":
-          this.$message("修改密码");
+          this.$router.push('/account')
           break;
 
         case "b":
