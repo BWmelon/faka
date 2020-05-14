@@ -14,7 +14,7 @@ const dbutils = require('../../../utils/db');
 // @desc 获取商品分类数据接口 前台调用
 // @access public
 router.get("/", (req, res) => {
-    goodsType.find().then(data => {
+    goodsType.find({status: 1}).then(data => {
         var retData = [];
         data.forEach(element => {
             retData.push({

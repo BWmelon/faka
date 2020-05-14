@@ -14,7 +14,8 @@ const dbutils = require('../../../utils/db');
 // @access public
 router.get("/type/:typeid", (req, res) => {
     goodsList.find({
-        typeid: req.params.typeid
+        typeid: req.params.typeid,
+        status: 1
     }).then(data => {
         var retData = [];
 

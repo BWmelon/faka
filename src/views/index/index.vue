@@ -30,8 +30,17 @@
                     <li>
                         <span>商家QQ</span>
                         {{ info.qq }}
-                        <a target="_blank" :href="'http://wpa.qq.com/msgrd?v=3&uin=' + info.qq +'&site=qq&menu=yes'" style="vertical-align: middle;">
-                            <img border="0" src="http://pub.idqqimg.com/qconn/wpa/button/button_111.gif" alt="点击这里给我发消息" title="点击这里给我发消息"/>
+                        <a
+                            target="_blank"
+                            :href="'http://wpa.qq.com/msgrd?v=3&uin=' + info.qq +'&site=qq&menu=yes'"
+                            style="vertical-align: middle;"
+                        >
+                            <img
+                                border="0"
+                                src="http://pub.idqqimg.com/qconn/wpa/button/button_111.gif"
+                                alt="点击这里给我发消息"
+                                title="点击这里给我发消息"
+                            />
                         </a>
                     </li>
                     <li>

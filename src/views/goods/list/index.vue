@@ -207,7 +207,6 @@ export default {
     },
     methods: {
         fetchData() {
-            // goodsListApi.getGoodsList().then(res => {
             goodsListApi
                 .getPagination(this.currentPage, this.pageSize)
                 .then(res => {
@@ -296,6 +295,7 @@ export default {
             });
         },
         handleEdit(id) {
+            this.handleAdd();
             goodsListApi.getById(id).then(res => {
                 const resp = res.data;
 
@@ -304,7 +304,7 @@ export default {
                     this.goodsListForm = resp.data;
                 }
                 this.getGoodsType();
-                this.handleAdd();
+                
             });
         },
         handleDelete(id) {

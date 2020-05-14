@@ -9,9 +9,9 @@ export default {
     });
   },
   // 获取支付配置信息
-  getPayInfo() {
+  getPayInfo(payPlatform) {
     return request({
-      url: "/pay",
+      url: `/pay/${payPlatform}`,
       method: "get"
     });
   },

@@ -1,24 +1,29 @@
-/* 卡密管理 */
+/* 支付设置 */
 const mongoose = require("mongoose")
 const Schema = mongoose.Schema
 
 // Create Schema
 const PaySchema = new Schema({
-    payType: {
+    payPlatform: {
         type: String,
-        required: true
     },
-    url: {
-        type: String,
-        required: true
+    url: { // 易支付-接口地址
+        type: String
     },
-    id: {
-        type: String,
-        required: true
+    id: { // 易支付-id
+        type: String
     },
-    key: {
-        type: String,
-        required: true
+    key: { // 易支付-密码
+        type: String
+    },
+    appid: { // 当面付-appid
+        type: String
+    },
+    aliPublicKey: { // 当面付-支付宝公钥 
+        type: String
+    },
+    appPrivateKey: { // 当面付-应用私钥
+        type: String
     }
 })
 

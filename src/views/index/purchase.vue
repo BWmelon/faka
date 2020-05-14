@@ -1,89 +1,97 @@
 <template>
-  <div>
-    <el-card class="box-card" style="width: 100%;">
-      <div slot="header" class="clearfix">
-        <span><i class="el-icon-shopping-cart-1"></i> 在线下单</span>
-        <el-button
-          style="float: right; padding: 3px 0"
-          type="text"
-          @click="$router.replace('/index/query')"
-          >查询订单</el-button
-        >
-      </div>
-      <el-form
-        ref="form"
-        :model="form"
-        label-width="80px"
-        :rules="rules"
-        :hide-required-asterisk="true"
-      >
-        <el-form-item label="商品分类" prop="goodsType">
-          <el-select
-            v-model="form.goodsType"
-            placeholder="请选择商品分类"
-            @change="getGoodsListByGoodsTypeId"
-          >
-            <el-option
-              v-for="option in goodsTypes"
-              :key="option.id"
-              :label="option.goodsType"
-              :value="option.typeid"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="商品名称" prop="goodsName">
-          <el-select
-            v-model="form.goodsName"
-            placeholder="请选择商品"
-            @change="getInfoByListid"
-          >
-            <el-option
-              v-for="option in goodsList"
-              :key="option.listid"
-              :label="option.goodsName"
-              :value="option.goodsName"
-            ></el-option>
-          </el-select>
-        </el-form-item>
+    <div>
+        <el-card class="box-card" style="width: 100%;">
+            <div slot="header" class="clearfix">
+                <span>
+                    <i class="el-icon-shopping-cart-1"></i> 在线下单
+                </span>
+                <el-button
+                    style="float: right; padding: 3px 0"
+                    type="text"
+                    @click="$router.replace('/index/query')"
+                >查询订单</el-button>
+            </div>
+            <el-form
+                ref="form"
+                :model="form"
+                label-width="80px"
+                :rules="rules"
+                :hide-required-asterisk="true"
+                v-loading="loading"
+                element-loading-text="提交订单中"
+            >
+                <el-form-item label="商品分类" prop="goodsType">
+                    <el-select
+                        v-model="form.goodsType"
+                        placeholder="请选择商品分类"
+                        @change="getGoodsListByGoodsTypeId"
+                    >
+                        <el-option
+                            v-for="option in goodsTypes"
+                            :key="option.id"
+                            :label="option.goodsType"
+                            :value="option.typeid"
+                        ></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="商品名称" prop="goodsName">
+                    <el-select
+                        v-model="form.goodsName"
+                        placeholder="请选择商品"
+                        @change="getInfoByListid"
+                    >
+                        <el-option
+                            v-for="option in goodsList"
+                            :key="option.listid"
+                            :label="option.goodsName"
+                            :value="option.goodsName"
+                        ></el-option>
+                    </el-select>
+                </el-form-item>
 
-        <el-form-item label="商品库存" prop="stock">
-          <el-input
-            placeholder="请选择商品"
-            v-model="form.stock"
-            :disabled="true"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="商品单价" prop="price">
-          <el-input
-            placeholder="0"
-            v-model="form.price"
-            :disabled="true"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="购买数量" prop="amount">
-          <el-input-number
-            v-model="form.amount"
-            :min="1"
-            :max="10"
-            @change="getPayMoney"
-          ></el-input-number>
-        </el-form-item>
-        <el-form-item label="联系方式" prop="phone">
-          <el-input v-model="form.phone"></el-input>
-        </el-form-item>
-        <el-form-item label="付款方式" prop="paytype">
-          <el-radio-group v-model="form.paytype">
-            <el-radio label="wxpay" v-model="form.radio">微信</el-radio>
-            <el-radio label="alipay" v-model="form.radio">支付宝</el-radio>
-            <el-radio label="qqpay" v-model="form.radio">QQ钱包</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="onSubmit">提交订单</el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
-  </div>
+                <el-form-item label="商品库存" prop="stock">
+                    <el-input placeholder="请选择商品" v-model="form.stock" :disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item label="商品单价" prop="price">
+                    <el-input placeholder="0" v-model="form.price" :disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item label="购买数量" prop="amount">
+                    <el-input-number
+                        v-model="form.amount"
+                        :min="1"
+                        :max="form.stock <= 10 ? form.stock : 10"
+                        @change="getPayMoney"
+                    ></el-input-number>
+                </el-form-item>
+                <el-form-item label="联系方式" prop="phone">
+                    <el-input v-model="form.phone"></el-input>
+                </el-form-item>
+                <el-form-item label="付款方式" prop="paytype">
+                    <el-radio-group v-model="form.paytype">
+                        <el-radio label="wxpay" v-model="form.radio">微信</el-radio>
+                        <el-radio label="alipay" v-model="form.radio">支付宝</el-radio>
+                        <el-radio label="qqpay" v-model="form.radio">QQ钱包</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="onSubmit">提交订单</el-button>
+                </el-form-item>
+            </el-form>
+
+            <el-dialog
+                title="支付"
+                :visible.sync="dialogVisible"
+                width="30%"
+                :before-close="handleClose"
+            >
+                <div class="qrcode" ref="qrCodeUrl"></div>
+                <span slot="footer" class="dialog-footer">
+                    <el-button @click="dialogVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+                </span>
+            </el-dialog>
+        </el-card>
+    </div>
 </template>
 
 <script>
@@ -91,129 +99,173 @@ import goodsTypeApi from "@/api/goodsType";
 // import goodsCardApi from "@/api/goodsCard";
 import goodsListApi from "@/api/goodsList";
 import payApi from "@/api/pay";
+import QRCode from "qrcodejs2";
 export default {
-  created() {
-    this.getGoodsTypeList();
-  },
-  data() {
-    return {
-      goodsTypes: [],
-      goodsList: [],
-      form: {
-        price: 0,
-        stock: 0,
-        radio: 1,
-        goodsName: null,
-        amount: 1,
-        money: 0
-      },
-      rules: {
-        goodsType: [
-          {
-            required: true,
-            message: "请选择商品分类",
-            trigger: "change"
-          }
-        ],
-        goodsName: [
-          { required: true, message: "请选择商品", trigger: "change" }
-        ],
-        count: [
-          {
-            required: true,
-            message: "请输入购买数量",
-            trigger: "blur"
-          },
-          { type: "number", message: "购买数量必须为数字值" }
-        ],
-        phone: [{ required: true, message: "请输入手机号", trigger: "blur" }],
-        payType: [
-          {
-            required: true,
-            message: "请选择支付方式",
-            trigger: "change"
-          }
-        ]
-      }
-    };
-  },
-  methods: {
-    getPayMoney() {
-      this.form.money = this.form.amount * this.form.price;
+    created() {
+        this.getGoodsTypeList();
     },
-    onSubmit() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          this.goodsList.forEach(value => {
-            if (value.goodsName == this.form.goodsName) {
-              this.form.listid = value.id;
+    mounted() {},
+    data() {
+        return {
+            dialogVisible: false,
+            loading: false,
+            goodsTypes: [],
+            goodsList: [],
+            form: {
+                price: 0,
+                stock: 0,
+                radio: 1,
+                goodsName: null,
+                amount: 1,
+                money: 0
+            },
+            rules: {
+                goodsType: [
+                    {
+                        required: true,
+                        message: "请选择商品分类",
+                        trigger: "change"
+                    }
+                ],
+                goodsName: [
+                    { required: true, message: "请选择商品", trigger: "change" }
+                ],
+                count: [
+                    {
+                        required: true,
+                        message: "请输入购买数量",
+                        trigger: "blur"
+                    },
+                    { type: "number", message: "购买数量必须为数字值" }
+                ],
+                phone: [
+                    { required: true, message: "请输入手机号", trigger: "blur" }
+                ],
+                payType: [
+                    {
+                        required: true,
+                        message: "请选择支付方式",
+                        trigger: "change"
+                    }
+                ]
             }
-          });
-          console.log(this.form.money);
+        };
+    },
+    methods: {
+        getPayMoney() {
+            this.form.money = this.form.amount * this.form.price;
+        },
+        onSubmit() {
+            this.$refs["form"].validate(valid => {
+                if (valid) {
+                    this.goodsList.forEach(value => {
+                        if (value.goodsName == this.form.goodsName) {
+                            this.form.listid = value.id;
+                        }
+                    });
+                    console.log(this.form.money);
+                    this.loading = true;
+                    payApi.launchPay(this.form).then(res => {
+                        console.log(res);
 
-          payApi.launchPay(this.form).then(res => {
-            const resp = res.data;
-            window.open(resp.payUrl, "_blank");
-          });
-        } else {
-          console.log(0);
-        }
-      });
-    },
-    // 获取商品分类
-    getGoodsTypeList() {
-      goodsTypeApi.getGoodsTypeList().then(res => {
-        const resp = res.data;
+                        const resp = res.data;
+                        this.loading = false;
+                        console.log(resp.payUrl);
+                        this.dialogVisible = true;
+                        this.$nextTick(() => {
+                            this.creatQrCode(resp.payUrl);
+                        })
+                        // window.open(resp.payUrl, "_blank");
+                    });
+                    
+                } else {
+                    console.log(0);
+                }
+            });
+        },
+        // 获取商品分类
+        getGoodsTypeList() {
+            goodsTypeApi.getGoodsTypeList().then(res => {
+                const resp = res.data;
 
-        this.goodsTypes = [];
-        if (resp.flag) {
-          resp.data.forEach(item => {
-            this.goodsTypes.push({
-              id: item.id,
-              goodsType: item.typeName,
-              typeid: item.typeid
+                this.goodsTypes = [];
+                if (resp.flag) {
+                    resp.data.forEach(item => {
+                        this.goodsTypes.push({
+                            id: item.id,
+                            goodsType: item.typeName,
+                            typeid: item.typeid
+                        });
+                    });
+                }
             });
-          });
-        }
-      });
-    },
-    // 根据商品分类id获取商品列表
-    getGoodsListByGoodsTypeId(typeid) {
-      goodsListApi.getGoodsList(typeid).then(res => {
-        const resp = res.data;
-        this.goodsList = [];
-        if (resp.flag) {
-          resp.data.forEach(item => {
-            this.goodsList.push({
-              id: item.listid,
-              goodsName: item.goodsName,
-              stock: item.stock,
-              price: item.price
+        },
+        // 根据商品分类id获取商品列表
+        getGoodsListByGoodsTypeId(typeid) {
+            goodsListApi.getGoodsList(typeid).then(res => {
+                const resp = res.data;
+                this.goodsList = [];
+                if (resp.flag) {
+                    resp.data.forEach(item => {
+                        this.goodsList.push({
+                            id: item.listid,
+                            goodsName: item.goodsName,
+                            stock: item.stock,
+                            price: item.price
+                        });
+                    });
+                }
             });
-          });
-        }
-      });
-    },
-    getInfoByListid() {
-      this.goodsList.forEach(item => {
-        if (item.goodsName == this.form.goodsName) {
-          this.form.price = item.price;
-          this.form.stock = item.stock;
-        }
-      });
-      this.form.money = this.form.amount * this.form.price;
+        },
+        getInfoByListid() {
+            this.goodsList.forEach(item => {
+                if (item.goodsName == this.form.goodsName) {
+                    this.form.price = item.price;
+                    this.form.stock = item.stock;
+                }
+            });
+            this.form.money = this.form.amount * this.form.price;
+        },
+        creatQrCode(url) {
+            let qrcode = new QRCode(this.$refs.qrCodeUrl, {
+                text: url,
+                width: 100,
+                height: 100,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        },
+        handleClose(done) {
+            this.$confirm("确认关闭订单？")
+                .then(_ => {
+                    done();
+                })
+                .catch(_ => {});
+        },
     }
-  }
 };
 </script>
 
 <style scoped>
 .el-select {
-  display: block;
+    display: block;
 }
 
 .el-input-number {
-  display: block;
-  width: 100%;
+    display: block;
+    width: 100%;
+}
+
+.qrcode {
+    display: inline-block;
+    vertical-align: top;
+}
+.qrcode img {
+    width: 132px;
+    height: 132px;
+    background-color: #fff;
+    padding: 6px;
+    box-sizing: border-box;
 }
 </style>

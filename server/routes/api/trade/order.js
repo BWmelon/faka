@@ -7,6 +7,7 @@ const Easypay = require("easypay-node-sdk");
 const pay = require("../../../models/setting/Pay")
 const order = require("../../../models/trade/Order")
 
+const goodsList = require('../../../models/goods/List')
 const goodsCard = require('../../../models/goods/Card')
 
 const dbutils = require('../../../utils/db');
@@ -46,8 +47,10 @@ router.get('/query/:out_trade_no', (req, res) => {
     })
 })
 
-// 获取支付信息
+// 异步通知支付信息
 router.get("/notify", (req, res) => {
+    console.log(1);
+    
     pay.findOne({
         payType: 'easypay'
     }).then(async data => {
@@ -98,6 +101,14 @@ router.get("/notify", (req, res) => {
                                 item.save();
                             })
 
+                            // 修改库存
+                            goodsList.findOne({listid: resp.listid}).then(data => {
+                                goodsCard.count({listid: resp.listid, status: 0}).then(stock => {
+                                    data.stock = stock;
+                                    data.save()
+                                })
+                            })
+
                            res.json();
                         }).catch(err => {
                             console.log(err)
@@ -108,8 +119,6 @@ router.get("/notify", (req, res) => {
 
 
             })
-
-
         }
     })
 })

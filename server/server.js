@@ -5,6 +5,9 @@ const passport = require('passport')
 const app = express()
 
 const login = require("./routes/api/login")
+const config = require("./routes/api/config")
+
+
 const goodsType = require('./routes/api/goods/type')
 const goodsList = require('./routes/api/goods/list')
 const goodsCard = require('./routes/api/goods/card')
@@ -38,6 +41,8 @@ require('./config/passport')(passport)
 
 // use routes
 app.use("/user/login", login)
+app.use("/user/config", config)
+
 app.use("/goods/type", goodsType)
 app.use("/goods/list", goodsList)
 app.use("/goods/card", goodsCard)
