@@ -25,7 +25,8 @@
 const payTypeFilter = {
     qqpay: "QQ钱包",
     alipay: "支付宝",
-    wxpay: "微信支付"
+    wxpay: "微信支付",
+    alif2f: "支付宝"
 };
 import queryApi from "@/api/query";
 export default {
@@ -51,9 +52,7 @@ export default {
                     this.amount = resp.data.amount;
                     this.money = resp.data.money;
                     this.payType = payTypeFilter[resp.data.payType];
-
                     this.cards = resp.data.cards.join(" ");
-
                     this.isShow = true;
                 } else {
                     this.isShow = false;

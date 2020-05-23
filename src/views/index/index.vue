@@ -88,11 +88,11 @@ export default {
                     this.info.name = resp.data.name;
                     this.info.url = resp.data.url;
                     this.info.qq = resp.data.qq;
-                    this.creatQrCode();
+                    this.createQrCode();
                 }
             });
         },
-        creatQrCode() {
+        createQrCode() {
             let qrcode = new QRCode(this.$refs.qrCodeUrl, {
                 text: this.info.url,
                 width: 100,

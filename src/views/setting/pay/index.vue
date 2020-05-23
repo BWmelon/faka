@@ -1,6 +1,18 @@
 <template>
     <div>
         <p class="platform">
+            <span>微信开关：</span>
+            <el-switch v-model="paySwitchWxpay" @change="changePaySwitch({type: 'paySwitchWxpay', status: paySwitchWxpay})"></el-switch>
+        </p>
+        <p class="platform">
+            <span>支付宝开关：</span>
+            <el-switch v-model="paySwitchAlipay" @change="changePaySwitch({type: 'paySwitchAlipay', status: paySwitchAlipay})"></el-switch>
+        </p>
+        <p class="platform">
+            <span>QQ钱包开关：</span>
+            <el-switch v-model="paySwitchQQpay" @change="changePaySwitch({type: 'paySwitchQQpay', status: paySwitchQQpay})"></el-switch>
+        </p>
+        <p class="platform">
             <span>当前收款方式：</span>
             <el-radio-group v-model="radio" @change="handleChangePayPlatform">
                 <el-radio label="alif2f">支付宝当面付</el-radio>
@@ -66,11 +78,15 @@
 
 <script>
 import pay from "@/api/pay";
-import configApi from "@/api/config"
+import configApi from "@/api/config";
 export default {
     data() {
         return {
-			radio: '',
+            radio: "",
+            paySwitchWxpay: false,
+            paySwitchAlipay: false,
+            paySwitchQQpay: false,
+            value: true,
             activeName: "alif2f",
             alif2fForm: {
                 payPlatform: "alif2f",
@@ -131,12 +147,13 @@ export default {
         };
     },
     created() {
+        this.getPaySwitch();
         configApi.getPayPlatform().then(data => {
-			const resp = data.data;
-			if(resp.flag) {
-				this.radio = resp.payPlatform
-			}
-		});
+            const resp = data.data;
+            if (resp.flag) {
+                this.radio = resp.payPlatform;
+            }
+        });
         this.getPayInfo("alif2f");
         this.getPayInfo("easypay");
     },
@@ -160,19 +177,21 @@ export default {
                     }
                 }
             });
-		},
-		// 修改当前收款平台
-		handleChangePayPlatform(platform) {
-			configApi.changePayPlatform({payPlatform: platform}).then(data => {
-				const resp = data.data;
-				if(resp.flag) {
-					this.$message({
-						type: 'success',
-						message: resp.message
-					})
-				}
-			});
-		},
+        },
+        // 修改当前收款平台
+        handleChangePayPlatform(platform) {
+            configApi
+                .changePayPlatform({ payPlatform: platform })
+                .then(data => {
+                    const resp = data.data;
+                    if (resp.flag) {
+                        this.$message({
+                            type: "success",
+                            message: resp.message
+                        });
+                    }
+                });
+        },
         updateAlif2() {
             this.$refs["alif2fForm"].validate(valid => {
                 if (valid) {
@@ -198,6 +217,30 @@ export default {
                     });
                 }
             });
+        },
+        // 获取支付开关状态
+        getPaySwitch() {
+            configApi.getPaySwitch().then(data => {
+                let resp = data.data;
+                if(resp.flag) {
+                    resp = resp.data;
+                    this.paySwitchWxpay = resp.paySwitchWxpay;
+                    this.paySwitchAlipay = resp.paySwitchAlipay;
+                    this.paySwitchQQpay = resp.paySwitchQQpay;
+                }
+            })
+        },
+        // 修改支付开关状态
+        changePaySwitch(data) {
+            configApi.changePaySwitch(data).then(data => {
+                const resp = data.data;
+                if(resp.flag) {
+                    this.$message({
+                        type: 'success',
+                        message: resp.message
+                    });
+                }
+            })
         }
     }
 };
@@ -205,13 +248,16 @@ export default {
 
 <style scoped>
 .platform {
-	font-size: 14px;
-	color: #606266;
-	margin-bottom: 20px;
+    font-size: 14px;
+    color: #606266;
+    margin-bottom: 20px;
+    display: flex;
 }
 
 .platform span {
-	margin-right: 20px;
+    margin-right: 20px;
+    width: 100px;
+    
 }
 
 .tip-margin {

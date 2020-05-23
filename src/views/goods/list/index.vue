@@ -237,6 +237,8 @@ export default {
         getGoodsType() {
             goodsTypeApi.getGoodsTypeList().then(res => {
                 const resp = res.data;
+                console.log(resp);
+                
 
                 this.goodsTypes = [];
                 if (resp.flag) {

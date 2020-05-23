@@ -3,6 +3,9 @@ const mongoose = require("mongoose")
 const bodyParser = require("body-parser")
 const passport = require('passport')
 const app = express()
+const path = require('path')
+
+app.use("/", express.static(path.join(__dirname, 'public')));
 
 const login = require("./routes/api/login")
 const config = require("./routes/api/config")

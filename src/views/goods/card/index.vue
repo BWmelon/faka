@@ -49,9 +49,6 @@
             @selection-change="handleSelectionChange"
         >
             <el-table-column type="selection" width="55"></el-table-column>
-            <!-- <el-table-column label="日期" width="120">
-        <template slot-scope="scope">{{ scope.row.time }}</template>
-            </el-table-column>-->
             <el-table-column prop="card" label="卡密" show-overflow-tooltip></el-table-column>
             <el-table-column
                 prop="status"
@@ -99,7 +96,6 @@
                 <el-row>
                     <el-form-item label="商品分类" :label-width="formLabelWidth" prop="goodsType">
                         <el-col :span="14">
-                            <!-- <el-select v-model="goodsListForm.typeName" :value="nowTypeName" placeholder="请选择商品分类"> -->
                             <el-select
                                 v-model="addCardForm.goodsType"
                                 placeholder="请选择商品分类"

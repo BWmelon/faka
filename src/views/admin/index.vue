@@ -1,6 +1,6 @@
 <template>
     <div class="login-container">
-        <el-form ref="form" :model="form" label-width="80px" :rules="rules" class="login-form">
+        <el-form ref="form" :model="form" label-width="80px" :rules="rules" class="login-form" :hide-required-asterisk="true">
             <h2 class="login-title">后台管理</h2>
             <el-form-item label="账号" prop="username">
                 <el-input v-model="form.username"></el-input>

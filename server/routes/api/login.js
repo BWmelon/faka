@@ -4,14 +4,34 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const keys = require('../../config/keys');
-const passport = require('passport')
+const passport = require('passport');
+const config = require('../../models/Config');
 
-const Login = require("../../models/Login")
+const Login = require("../../models/Login");
 
 // 检测是否初始化账号密码
 router.get('/', (req, res) => {
     Login.find().then(data => {
         if (!data.length) {
+            // 初始化数据库
+            config.insertMany([
+                {
+                    configName: 'paySwitchWxpay',
+                    configValue: '1',
+                },
+                {
+                    configName: 'paySwitchAlipay',
+                    configValue: '1',
+                },
+                {
+                    configName: 'paySwitchQQpay',
+                    configValue: '1',
+                },
+                {
+                    configName: 'payPlatform',
+                    configValue: 'alif2f',
+                },
+            ]);
             // 初始化账号密码admin 123456
             bcrypt.genSalt(10, function (err, salt) {
                 bcrypt.hash('123456', salt, (err, hash) => {
@@ -116,9 +136,6 @@ router.put("/", (req, res) => {
                                 });
                             });
                         });
-                        
-
-                            
                     }
                 })
         })

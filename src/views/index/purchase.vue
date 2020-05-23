@@ -68,9 +68,9 @@
                 </el-form-item>
                 <el-form-item label="付款方式" prop="paytype">
                     <el-radio-group v-model="form.paytype">
-                        <el-radio label="wxpay" v-model="form.radio">微信</el-radio>
-                        <el-radio label="alipay" v-model="form.radio">支付宝</el-radio>
-                        <el-radio label="qqpay" v-model="form.radio">QQ钱包</el-radio>
+                        <el-radio label="wxpay" v-model="form.radio" v-show="paySwitchWxpay">微信</el-radio>
+                        <el-radio label="alipay" v-model="form.radio" v-show="paySwitchAlipay">支付宝</el-radio>
+                        <el-radio label="qqpay" v-model="form.radio" v-show="paySwitchQQpay">QQ钱包</el-radio>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item>
@@ -85,28 +85,29 @@
                 :before-close="handleClose"
             >
                 <div class="qrcode" ref="qrCodeUrl"></div>
-                <span slot="footer" class="dialog-footer">
-                    <el-button @click="dialogVisible = false">取 消</el-button>
-                    <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
-                </span>
             </el-dialog>
         </el-card>
     </div>
 </template>
 
 <script>
+let running;
 import goodsTypeApi from "@/api/goodsType";
-// import goodsCardApi from "@/api/goodsCard";
 import goodsListApi from "@/api/goodsList";
 import payApi from "@/api/pay";
 import QRCode from "qrcodejs2";
+import configApi from "@/api/config";
 export default {
     created() {
         this.getGoodsTypeList();
+        this.getPaySwitch();
     },
     mounted() {},
     data() {
         return {
+            paySwitchWxpay: false,
+            paySwitchAlipay: false,
+            paySwitchQQpay: false,
             dialogVisible: false,
             loading: false,
             goodsTypes: [],
@@ -117,7 +118,8 @@ export default {
                 radio: 1,
                 goodsName: null,
                 amount: 1,
-                money: 0
+                money: 0,
+                out_trade_no: ""
             },
             rules: {
                 goodsType: [
@@ -152,10 +154,14 @@ export default {
         };
     },
     methods: {
+        // 计算商品总价
         getPayMoney() {
             this.form.money = this.form.amount * this.form.price;
         },
+        // 提交订单
         onSubmit() {
+            const out_trade_no = this.createOrderNo();
+            this.form.out_trade_no = out_trade_no;
             this.$refs["form"].validate(valid => {
                 if (valid) {
                     this.goodsList.forEach(value => {
@@ -166,22 +172,38 @@ export default {
                     console.log(this.form.money);
                     this.loading = true;
                     payApi.launchPay(this.form).then(res => {
-                        console.log(res);
-
                         const resp = res.data;
                         this.loading = false;
                         console.log(resp.payUrl);
                         this.dialogVisible = true;
                         this.$nextTick(() => {
-                            this.creatQrCode(resp.payUrl);
-                        })
+                            this.createQrCode(resp.payUrl);
+                            this.checkPayStatus(out_trade_no);
+                        });
                         // window.open(resp.payUrl, "_blank");
                     });
-                    
                 } else {
                     console.log(0);
                 }
             });
+        },
+        // 查询支付状态
+        checkPayStatus(out_trade_no) {
+            running = setTimeout(() => {
+                console.log("查询中");
+
+                payApi.checkPayStatus(out_trade_no).then(res => {
+                    const resp = res.data;
+                    if (resp.flag) {
+                        console.log("已支付");
+                        clearInterval(running);
+                        this.$router.push(`/index/query/${this.form.out_trade_no}`);
+                    } else {
+                        console.log("未支付");
+                        this.checkPayStatus(out_trade_no);
+                    }
+                });
+            }, 1000);
         },
         // 获取商品分类
         getGoodsTypeList() {
@@ -226,23 +248,75 @@ export default {
             });
             this.form.money = this.form.amount * this.form.price;
         },
-        creatQrCode(url) {
+        createQrCode(url) {
+            this.$refs.qrCodeUrl.innerHTML = '';
             let qrcode = new QRCode(this.$refs.qrCodeUrl, {
-                text: url,
                 width: 100,
                 height: 100,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
             });
+            
+            qrcode.makeCode(url)
         },
         handleClose(done) {
             this.$confirm("确认关闭订单？")
                 .then(_ => {
+                    clearInterval(running);
                     done();
                 })
                 .catch(_ => {});
         },
+        // 获取支付开关状态
+        getPaySwitch() {
+            configApi.getPaySwitch().then(data => {
+                let resp = data.data;
+                if(resp.flag) {
+                    resp = resp.data;
+                    this.paySwitchWxpay = resp.paySwitchWxpay;
+                    this.paySwitchAlipay = resp.paySwitchAlipay;
+                    this.paySwitchQQpay = resp.paySwitchQQpay;
+                }
+            })
+        },
+        // 生成订单号
+        createOrderNo() {
+            let now = new Date();
+            let year = now.getFullYear(); //年
+            let month = now.getMonth() + 1; //月
+            let day = now.getDate(); //日
+            let hh = now.getHours(); //时
+            let mm = now.getMinutes(); //分
+            let ss = now.getMilliseconds(); //秒
+            let ms = now.getSeconds(); //秒
+            let clock = year + "";
+            if (month < 10) clock += "0";
+
+            clock += month + "";
+
+            if (day < 10) clock += "0";
+
+            clock += day + "";
+
+            if (hh < 10) clock += "0";
+
+            clock += hh + "";
+            if (mm < 10) clock += "0";
+            clock += mm + "";
+
+            if (ss < 10) clock += "0";
+            clock += ss;
+
+            if (ms < 10) clock += "0";
+            clock += ms;
+
+            clock += Math.floor(Math.random() * (9999 - 0))
+                .toString()
+                .padStart(4, "0");
+
+            return clock;
+        }
     }
 };
 </script>

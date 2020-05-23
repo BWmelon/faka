@@ -2,9 +2,8 @@ const express = require("express");
 const router = express.Router();
 const passport = require('passport')
 
-const alipayf2f = require("alipay-ftof");
-
 const Easypay = require("easypay-node-sdk");
+const alipayf2f = require("alipay-ftof");
 
 const order = require("../../../models/trade/Order")
 const pay = require("../../../models/setting/Pay")
@@ -77,8 +76,7 @@ router.post("/", (req, res) => {
     // 生成订单
     let orderInfo = new Order();
 
-    let out_trade_no = creatOrderNo();
-    orderInfo.out_trade_no = out_trade_no;
+    orderInfo.out_trade_no = req.body.out_trade_no;
     orderInfo.trade_no = '0';
     orderInfo.payTime = '0';
     orderInfo.status = 0; // 0未支付，1已支付
@@ -93,7 +91,7 @@ router.post("/", (req, res) => {
         if (!err) {
             const info = {
                 paytype: req.body.paytype,
-                out_trade_no,
+                out_trade_no: req.body.out_trade_no,
                 goodsName: req.body.goodsName,
                 money: req.body.money,
             };
@@ -103,19 +101,19 @@ router.post("/", (req, res) => {
                 const payPlatform = data.configValue;
                 switch (payPlatform) {
                     case 'alif2f':
-                        
+
                         getAlif2fUrl(info).then(payUrl => {
                             res.json({
                                 flag: true,
                                 payUrl
-                            });                            
+                            });
                         });
                         break;
 
                     case 'easypay':
                         getEasypayUrl(info);
                         break;
-                
+
                     default:
                         break;
                 }
@@ -123,7 +121,7 @@ router.post("/", (req, res) => {
         }
     });
 
-    
+
     //     } else {
     //         res.json({
     //             status: 2000,
@@ -173,21 +171,21 @@ function getAlif2fUrl(info) {
         pay.findOne({
             payPlatform: 'alif2f'
         }).then(async data => {
-            
+
             const alipayConfig = {
                 /* 以下信息可以在https://openhome.alipay.com/platform/appManage.htm查到, 不过merchantPrivateKey需要您自己生成 */
-    
+
                 /* 应用AppID */
                 appid: data.appid,
-    
+
                 /* 通知URL 接受支付宝异步通知需要用到  */
                 notifyUrl: 'http://127.0.0.1:5001/trade/order/notify',
-    
+
                 /* 公钥 和 私钥 的填写方式 */
                 testPrivateKey: "-----BEGIN RSA PRIVATE KEY-----\n" +
                     "公钥或私钥内容..." +
                     "\n-----END RSA PRIVATE KEY-----",
-    
+
                 /* 应用RSA私钥 请勿忘记 -----BEGIN RSA PRIVATE KEY----- 与 -----END RSA PRIVATE KEY-----  */
                 merchantPrivateKey: "-----BEGIN RSA PRIVATE KEY-----\n" +
                     data.appPrivateKey +
@@ -196,13 +194,13 @@ function getAlif2fUrl(info) {
                 alipayPublicKey: "-----BEGIN PUBLIC KEY-----\n" +
                     data.aliPublicKey +
                     "\n-----END PUBLIC KEY-----",
-    
+
                 /* 支付宝支付网关 如果为注释掉会使用沙盒网关 */
                 gatewayUrl: "https://openapi.alipay.com/gateway.do",
             };
-    
+
             const alipay_f2f = new alipayf2f(alipayConfig);
-    
+
             await alipay_f2f.createQRPay({
                 tradeNo: info.out_trade_no, // 必填 商户订单主键, 就是你要生成的
                 subject: info.goodsName, // 必填 商品概要
@@ -211,51 +209,12 @@ function getAlif2fUrl(info) {
                 timeExpress: 5, // 可选 支付超时, 默认为5分钟
             }).then(result => {
                 console.log(result);
-    
+
                 resolve(result.qr_code);
-                
+
             });
         })
     })
-}
-
-// 生成订单号
-function creatOrderNo() {
-    let now = new Date();
-    let year = now.getFullYear(); //年
-    let month = now.getMonth() + 1; //月
-    let day = now.getDate(); //日
-    let hh = now.getHours(); //时
-    let mm = now.getMinutes(); //分
-    let ss = now.getMilliseconds(); //秒
-    let ms = now.getSeconds(); //秒
-    let clock = year + "";
-    if (month < 10)
-        clock += "0";
-
-    clock += month + "";
-
-    if (day < 10)
-        clock += "0";
-
-    clock += day + "";
-
-    if (hh < 10)
-        clock += "0";
-
-    clock += hh + "";
-    if (mm < 10) clock += '0';
-    clock += mm + "";
-
-    if (ss < 10) clock += '0';
-    clock += ss;
-
-    if (ms < 10) clock += '0';
-    clock += ms;
-
-    clock += Math.floor(Math.random() * (9999 - 0)).toString().padStart(4, '0')
-
-    return (clock);
 }
 
 module.exports = router
