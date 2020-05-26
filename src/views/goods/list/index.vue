@@ -1,7 +1,7 @@
 <template>
     <div>
         <!-- 新增开始 -->
-        <el-button type="success" icon="el-icon-plus" @click="handleAddGoodsList" size="small">新增</el-button>
+        <el-button type="success" icon="el-icon-plus" @click="handleAddGoodsList" size="small" class="add">新增</el-button>
         <!-- 新增结束 -->
         <!-- talel开始 -->
         <el-table :data="goodsList" height="700" border style="width: 100%">
@@ -405,6 +405,9 @@ export default {
 </script>
 
 <style scoped>
+.add {
+    margin-bottom: 10px;
+}
 .el-alert {
     padding-top: 0;
     padding-bottom: 0;

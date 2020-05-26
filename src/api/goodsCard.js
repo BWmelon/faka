@@ -27,6 +27,14 @@ export default {
 			method: "delete"
 		});
 	},
+	// 修改卡密使用状态
+	changeCardStatus(data) {
+		return request({
+			url: `goods/card/${data.id}`,
+			method: "put",
+			data
+		});
+	},
 	deleteMoreById(data) {
 		return request({
 			url: `goods/card/delete`,

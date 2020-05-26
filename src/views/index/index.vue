@@ -19,17 +19,9 @@
                     </span>
                 </div>
                 <ul class="info-item">
-                    <li>
-                        <span>商铺名称</span>
-                        {{ info.name }}
-                    </li>
-                    <li>
-                        <span>商铺地址</span>
-                        {{ info.url }}
-                    </li>
-                    <li>
-                        <span>商家QQ</span>
-                        {{ info.qq }}
+                    <li><span>商铺名称</span>{{ info.name }}</li>
+                    <li><span>商铺地址</span>{{ info.url }}</li>
+                    <li><span>商家QQ</span>{{ info.qq }}
                         <a
                             target="_blank"
                             :href="'http://wpa.qq.com/msgrd?v=3&uin=' + info.qq +'&site=qq&menu=yes'"
@@ -43,10 +35,7 @@
                             />
                         </a>
                     </li>
-                    <li>
-                        <span>手机下单</span>
-                        <div class="qrcode" ref="qrCodeUrl"></div>
-                    </li>
+                    <li><span>手机下单</span><div class="qrcode" ref="qrCodeUrl"></div></li>
                 </ul>
             </el-card>
         </div>

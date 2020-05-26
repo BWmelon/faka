@@ -143,7 +143,7 @@ export default {
                 phone: [
                     { required: true, message: "请输入手机号", trigger: "blur" }
                 ],
-                payType: [
+                paytype: [
                     {
                         required: true,
                         message: "请选择支付方式",
@@ -164,26 +164,44 @@ export default {
             this.form.out_trade_no = out_trade_no;
             this.$refs["form"].validate(valid => {
                 if (valid) {
-                    this.goodsList.forEach(value => {
-                        if (value.goodsName == this.form.goodsName) {
-                            this.form.listid = value.id;
+                    configApi.getPayPlatform().then(data => {
+                        const resp = data.data;
+                        console.log(resp);
+
+                        if (resp.flag) {
+                            if (resp.payPlatform == "alif2fAndPayjs") {
+                                console.log(this.form.paytype);
+
+                                if (this.form.paytype == "alipay") {
+                                    this.form.paytype = "alif2f";
+                                } else if (this.form.paytype == "wxpay") {
+                                    this.form.paytype = "payjs";
+                                } else {
+                                }
+                                console.log(this.form.paytype);
+                                this.goodsList.forEach(value => {
+                                    if (
+                                        value.goodsName == this.form.goodsName
+                                    ) {
+                                        this.form.listid = value.id;
+                                    }
+                                });
+                                console.log(this.form.money);
+                                this.loading = true;
+                                payApi.launchPay(this.form).then(res => {
+                                    const resp = res.data;
+                                    this.loading = false;
+                                    console.log(resp.payUrl);
+                                    this.dialogVisible = true;
+                                    this.$nextTick(() => {
+                                        this.createQrCode(resp.payUrl);
+                                        this.checkPayStatus(out_trade_no);
+                                    });
+                                    // window.open(resp.payUrl, "_blank");
+                                });
+                            }
                         }
                     });
-                    console.log(this.form.money);
-                    this.loading = true;
-                    payApi.launchPay(this.form).then(res => {
-                        const resp = res.data;
-                        this.loading = false;
-                        console.log(resp.payUrl);
-                        this.dialogVisible = true;
-                        this.$nextTick(() => {
-                            this.createQrCode(resp.payUrl);
-                            this.checkPayStatus(out_trade_no);
-                        });
-                        // window.open(resp.payUrl, "_blank");
-                    });
-                } else {
-                    console.log(0);
                 }
             });
         },
@@ -197,7 +215,9 @@ export default {
                     if (resp.flag) {
                         console.log("已支付");
                         clearInterval(running);
-                        this.$router.push(`/index/query/${this.form.out_trade_no}`);
+                        this.$router.push(
+                            `/index/query/${this.form.out_trade_no}`
+                        );
                     } else {
                         console.log("未支付");
                         this.checkPayStatus(out_trade_no);
@@ -249,7 +269,7 @@ export default {
             this.form.money = this.form.amount * this.form.price;
         },
         createQrCode(url) {
-            this.$refs.qrCodeUrl.innerHTML = '';
+            this.$refs.qrCodeUrl.innerHTML = "";
             let qrcode = new QRCode(this.$refs.qrCodeUrl, {
                 width: 100,
                 height: 100,
@@ -257,8 +277,8 @@ export default {
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
             });
-            
-            qrcode.makeCode(url)
+
+            qrcode.makeCode(url);
         },
         handleClose(done) {
             this.$confirm("确认关闭订单？")
@@ -272,13 +292,13 @@ export default {
         getPaySwitch() {
             configApi.getPaySwitch().then(data => {
                 let resp = data.data;
-                if(resp.flag) {
+                if (resp.flag) {
                     resp = resp.data;
                     this.paySwitchWxpay = resp.paySwitchWxpay;
                     this.paySwitchAlipay = resp.paySwitchAlipay;
                     this.paySwitchQQpay = resp.paySwitchQQpay;
                 }
-            })
+            });
         },
         // 生成订单号
         createOrderNo() {

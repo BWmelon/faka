@@ -92,6 +92,36 @@ router.post("/", passport.authenticate('jwt', {
     });
 })
 
+// $route put goods/card
+// @desc 修改单个卡密状态
+// @access private
+router.put("/:id", passport.authenticate('jwt', {
+    session: false
+}), (req, res) => {
+    goodsCard.findById(req.params.id).then(data => {
+        data.status = req.body.status;
+        let listid = data.listid;
+        data.save().then(() => {
+            goodsCard.count({
+                listid,
+                status: 0
+            }).then(count => {
+                goodsList.findOne({
+                    listid
+                }).then(data => {
+                    data.stock = count;
+                    data.save(() => {
+                        res.json({
+                            flag: true,
+                            message: '修改状态成功'
+                        })
+                    })
+                })
+            })
+        })
+    })
+})
+
 // $route Delete goods/card
 // @desc 删除单个卡密
 // @access private

@@ -4,6 +4,7 @@ const passport = require('passport')
 
 const Easypay = require("easypay-node-sdk");
 const alipayf2f = require("alipay-ftof");
+const payjs = require("../../../config/payjs");
 
 const order = require("../../../models/trade/Order")
 const pay = require("../../../models/setting/Pay")
@@ -26,6 +27,8 @@ router.put("/", passport.authenticate('jwt', {
             data.aliPublicKey = req.body.aliPublicKey;
             data.appPrivateKey = req.body.appPrivateKey;
             data.key = req.body.key;
+            data.payjskey = req.body.payjskey;
+            data.payjsmchid = req.body.payjsmchid;
             data.save((err) => {
                 if (!err) {
                     res.json({
@@ -42,6 +45,8 @@ router.put("/", passport.authenticate('jwt', {
             config.appid = req.body.appid;
             config.aliPublicKey = req.body.aliPublicKey;
             config.appPrivateKey = req.body.appPrivateKey;
+            config.payjskey = req.body.payjskey;
+            config.payjsmchid = req.body.payjsmchid;
             config.save((err) => {
                 if (!err) {
                     res.json({
@@ -58,8 +63,6 @@ router.put("/", passport.authenticate('jwt', {
 router.get("/:payPlatform", passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
-    let config = new Pay();
-
     pay.findOne({
         payPlatform: req.params.payPlatform
     }).then(data => {
@@ -73,6 +76,8 @@ router.get("/:payPlatform", passport.authenticate('jwt', {
 
 // 前台发起支付
 router.post("/", (req, res) => {
+    console.log('发起支付');
+    
     // 生成订单
     let orderInfo = new Order();
 
@@ -95,19 +100,31 @@ router.post("/", (req, res) => {
                 goodsName: req.body.goodsName,
                 money: req.body.money,
             };
-            config.findOne({
-                configName: 'payPlatform'
-            }).then(data => {
+            config.findOne({configName: 'payPlatform'}).then(data => {
                 const payPlatform = data.configValue;
                 switch (payPlatform) {
-                    case 'alif2f':
-
-                        getAlif2fUrl(info).then(payUrl => {
-                            res.json({
-                                flag: true,
-                                payUrl
+                    case 'alif2fAndPayjs':
+                        // 判断是支付宝付款还是微信付款
+                        if(req.body.paytype == 'alif2f') {
+                            getAlif2fUrl(info).then(payUrl => {
+                                res.json({
+                                    flag: true,
+                                    payUrl
+                                });
                             });
-                        });
+                        } else if(req.body.paytype == 'payjs') {
+                            getPayjsUrl(info).then(payUrl => {
+                                res.json({
+                                    flag: true,
+                                    payUrl
+                                });
+                            });
+                        } else {
+                            res.json({
+                                flag: false,
+                                message: '支付方式未配置'
+                            });
+                        }
                         break;
 
                     case 'easypay':
@@ -179,7 +196,7 @@ function getAlif2fUrl(info) {
                 appid: data.appid,
 
                 /* 通知URL 接受支付宝异步通知需要用到  */
-                notifyUrl: 'http://127.0.0.1:5001/trade/order/notify',
+                notifyUrl: 'http://esyeqi.natappfree.cc/trade/order/notify',
 
                 /* 公钥 和 私钥 的填写方式 */
                 testPrivateKey: "-----BEGIN RSA PRIVATE KEY-----\n" +
@@ -200,7 +217,6 @@ function getAlif2fUrl(info) {
             };
 
             const alipay_f2f = new alipayf2f(alipayConfig);
-
             await alipay_f2f.createQRPay({
                 tradeNo: info.out_trade_no, // 必填 商户订单主键, 就是你要生成的
                 subject: info.goodsName, // 必填 商品概要
@@ -208,12 +224,28 @@ function getAlif2fUrl(info) {
                 body: `购买${info.goodsName}，金额为${info.money}`, // 可选 订单描述, 可以对交易或商品进行一个详细地描述，比如填写"购买商品2件共15.00元"
                 timeExpress: 5, // 可选 支付超时, 默认为5分钟
             }).then(result => {
-                console.log(result);
-
                 resolve(result.qr_code);
-
             });
         })
+    })
+}
+
+// 获取Payjs url
+function getPayjsUrl(info) {
+    return new Promise((resolve, reject) => {
+        const params = {
+            'mchid': 'xxx', //商户号
+            'total_fee': info.money * 100, //金额。单位：分
+            'out_trade_no': info.out_trade_no, //用户端自主生成的订单号
+            'body': info.goodsName, //订单标题
+            'attach': '自定义数据', //用户自定义数据，在notify的时候会原样返回
+            'notify_url': 'http://esyeqi.natappfree.cc/trade/order/notify' //接收微信支付异步通知的回调地址。必须为可直接访问的URL，不能带参数、session验证、csrf验证。留空则不通知
+        };
+        payjs.native(params, data => {
+            if(data.return_code == 1) {
+                resolve(data.code_url);
+            }
+        });
     })
 }
 

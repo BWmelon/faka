@@ -4,9 +4,7 @@ const passport = require('passport')
 const config = require('../../models/Config')
 
 // 获取当前使用的收款平台
-router.get("/platform", passport.authenticate('jwt', {
-    session: false
-}), (req, res) => {
+router.get("/platform", (req, res) => {
     config.findOne({
         configName: 'payPlatform'
     }).then(data => {

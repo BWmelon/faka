@@ -24,6 +24,12 @@ const PaySchema = new Schema({
     },
     appPrivateKey: { // 当面付-应用私钥
         type: String
+    },
+    payjskey: { // payjs-通信密钥
+        type: String
+    },
+    payjsmchid: { // payjs-商户号
+        type: String
     }
 })
 

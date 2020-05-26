@@ -15,6 +15,7 @@ export default {
 			method: "get"
 		});
 	},
+	// 前台发起支付
 	launchPay(data) {
 		return request({
 			url: "/pay",
@@ -22,7 +23,7 @@ export default {
 			data
 		});
 	},
-	// 检测支付状态
+	// 前台检测支付状态
 	checkPayStatus(out_trade_no) {
 		return request({
 			url: `/trade/order/checkStatus/${out_trade_no}`,

@@ -15,7 +15,7 @@
         <p class="platform">
             <span>当前收款方式：</span>
             <el-radio-group v-model="radio" @change="handleChangePayPlatform">
-                <el-radio label="alif2f">支付宝当面付</el-radio>
+                <el-radio label="alif2fAndPayjs">支付宝当面付和Payjs</el-radio>
                 <el-radio label="easypay">易支付</el-radio>
             </el-radio-group>
         </p>
@@ -39,6 +39,31 @@
                     </el-form-item>
                     <el-form-item>
                         <el-button type="primary" @click="updateAlif2">修改</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
+            <el-tab-pane label="Payjs" name="Payjs">
+                <el-alert
+                    title="仅支持Payjs中的微信收款"
+                    type="warning"
+                    effect="dark"
+                    class="tip-margin"
+                ></el-alert>
+                <el-form
+                    ref="easypayForm"
+                    :model="payjsForm"
+                    label-width="100px"
+                    :rules="rules"
+                    :hide-required-asterisk="true"
+                >
+                    <el-form-item label="通信密钥" prop="payjskey">
+                        <el-input v-model="payjsForm.payjskey"></el-input>
+                    </el-form-item>
+                    <el-form-item label="商户号" prop="payjsmchid">
+                        <el-input v-model="payjsForm.payjsmchid"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="updatePayjs">修改</el-button>
                     </el-form-item>
                 </el-form>
             </el-tab-pane>
@@ -70,8 +95,6 @@
                     </el-form-item>
                 </el-form>
             </el-tab-pane>
-            <el-tab-pane label="角色管理" name="third">角色管理</el-tab-pane>
-            <el-tab-pane label="定时任务补偿" name="fourth">定时任务补偿</el-tab-pane>
         </el-tabs>
     </div>
 </template>
@@ -94,6 +117,11 @@ export default {
                 aliPublicKey: "",
                 appPrivateKey: ""
             },
+            payjsForm: {
+                payPlatform: "payjs",
+                payjskey: '', // payjs的通信密钥
+                payjsmchid: '' //payjs的商户号
+            },
             easypayForm: {
                 payPlatform: "easypay",
                 url: "",
@@ -101,6 +129,41 @@ export default {
                 key: ""
             },
             rules: {
+                appid: [
+                    {
+                        required: true,
+                        message: "请输入APPID",
+                        trigger: "blur"
+                    }
+                ],
+                aliPublicKey: [
+                    {
+                        required: true,
+                        message: "请输入支付宝公钥",
+                        trigger: "blur"
+                    }
+                ],
+                appPrivateKey: [
+                    {
+                        required: true,
+                        message: "请输入应用私钥",
+                        trigger: "blur"
+                    }
+                ],
+                payjskey: [
+                    {
+                        required: true,
+                        message: "请输入Payjs通信密钥",
+                        trigger: "blur"
+                    }
+                ],
+                payjsmchid: [
+                    {
+                        required: true,
+                        message: "请输入Payjs商户号",
+                        trigger: "blur"
+                    }
+                ],
                 url: [
                     {
                         required: true,
@@ -122,27 +185,6 @@ export default {
                         trigger: "blur"
                     }
                 ],
-                appid: [
-                    {
-                        required: true,
-                        message: "请输入APPID",
-                        trigger: "blur"
-                    }
-                ],
-                aliPublicKey: [
-                    {
-                        required: true,
-                        message: "请输入支付宝公钥",
-                        trigger: "blur"
-                    }
-                ],
-                appPrivateKey: [
-                    {
-                        required: true,
-                        message: "请输入应用私钥",
-                        trigger: "blur"
-                    }
-                ]
             }
         };
     },
@@ -197,6 +239,19 @@ export default {
                 if (valid) {
                     this.alif2fForm.payPlatform = "alif2f";
                     pay.updatePayType(this.alif2fForm).then(data => {
+                        this.$message({
+                            type: "success",
+                            message: data.data.message
+                        });
+                    });
+                }
+            });
+        },
+        updatePayjs() {
+            this.$refs["payjsForm"].validate(valid => {
+                if (valid) {
+                    this.payjsForm.payPlatform = "payjs";
+                    pay.updatePayType(this.payjsForm).then(data => {
                         this.$message({
                             type: "success",
                             message: data.data.message

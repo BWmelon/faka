@@ -3,12 +3,7 @@
         <!-- 顶部按钮开始 -->
         <el-row>
             <el-col>
-                <el-button
-                    type="success"
-                    icon="el-icon-plus"
-                    @click="handleDeleteMoreCard"
-                    size="small"
-                >删除选中</el-button>
+                <el-button class="delete" type="success" icon="el-icon-plus" @click="handleDeleteMoreCard" size="small">删除选中</el-button>
             </el-col>
             <el-col>
                 <el-form>
@@ -45,7 +40,7 @@
             :data="goodsCard"
             tooltip-effect="dark"
             style="width: 100%"
-            height="700"
+            height="650"
             @selection-change="handleSelectionChange"
         >
             <el-table-column type="selection" width="55"></el-table-column>
@@ -54,16 +49,13 @@
                 prop="status"
                 label="状态"
                 width="100"
-                :filters="[
-          { text: '已使用', value: 1 },
-          { text: '未使用', value: 0 }
-        ]"
+                :filters="[{ text: '已使用', value: 1 },{ text: '未使用', value: 0 }]"
                 :filter-method="filterTag"
                 filter-placement="bottom-end"
             >
                 <template slot-scope="scope">
                     <el-tag
-                        :type="scope.row.status === 0 ? 'primary' : 'success'"
+                        :type="scope.row.status == 0 ? 'primary' : 'success'"
                         disable-transitions
                     >{{ scope.row.status == 0 ? "未使用" : "已使用" }}</el-tag>
                 </template>
@@ -75,6 +67,7 @@
             <el-table-column prop="phone" label="联系方式" show-overflow-tooltip width="180"></el-table-column>
             <el-table-column label="操作" width="280">
                 <template slot-scope="scope">
+                    <el-button size="mini" :type="scope.row.status ? 'primary' : 'success'" @click="changeCardStatus({id: scope.row.id, status: scope.row.status == 0 ? 1 : 0});scope.row.status = !scope.row.status;">标为{{scope.row.status == 0 ? "已" : "未"}}使用</el-button>
                     <el-button size="mini" type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
                 </template>
             </el-table-column>
@@ -117,7 +110,6 @@
                 <el-row>
                     <el-form-item label="商品名称" :label-width="formLabelWidth" prop="goodsName">
                         <el-col :span="14">
-                            <!-- <el-select v-model="goodsListForm.typeName" :value="nowTypeName" placeholder="请选择商品分类"> -->
                             <el-select
                                 v-model="addCardForm.listid"
                                 placeholder="请选择商品"
@@ -139,7 +131,6 @@
                 <el-row>
                     <el-form-item label="卡密信息" :label-width="formLabelWidth" prop="cards">
                         <el-col :span="24">
-                            <!-- <el-select v-model="goodsListForm.typeName" :value="nowTypeName" placeholder="请选择商品分类"> -->
                             <el-input
                                 type="textarea"
                                 v-model="addCardForm.cards"
@@ -293,8 +284,7 @@ export default {
                     confirmButtonText: "确定",
                     cancelButtonText: "取消",
                     type: "warning"
-                })
-                    .then(() => {
+                }).then(() => {
                         goodsCardApi
                             .deleteMoreById(this.cardIdToDelete)
                             .then(res => {
@@ -334,8 +324,8 @@ export default {
             })
                 .then(() => {
                     goodsCardApi.deleteOneById(id).then(res => {
-						console.log(res);
-						
+                        console.log(res);
+
                         const resp = res.data;
                         if (resp.flag) {
                             this.$message({
@@ -351,7 +341,7 @@ export default {
                         }
                     });
                 })
-                .catch((err) => {
+                .catch(err => {
                     this.$message({
                         type: "info",
                         message: "已取消删除"
@@ -443,9 +433,25 @@ export default {
         },
         filterTag(value, row) {
             return row.status === value;
+        },
+        // 手动修改卡密使用状态
+        changeCardStatus(data) {
+            goodsCardApi.changeCardStatus(data).then(res => {
+                const resp = res.data;
+                if(resp.flag) {
+                    this.$message({
+                        type: 'success',
+                        message: resp.message
+                    })
+                }
+            })
         }
     }
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.delete {
+    margin-bottom: 10px;
+}
+</style>

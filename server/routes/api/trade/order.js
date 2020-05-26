@@ -5,12 +5,14 @@ const passport = require('passport')
 const Easypay = require("easypay-node-sdk");
 
 const alipayf2f = require("alipay-ftof");
+const payjs = require("../../../config/payjs");
 
 const pay = require("../../../models/setting/Pay")
 const order = require("../../../models/trade/Order")
 
 const goodsList = require('../../../models/goods/List')
 const goodsCard = require('../../../models/goods/Card')
+const config = require("../../../models/Config")
 
 const dbutils = require('../../../utils/db');
 
@@ -130,101 +132,122 @@ router.get("/notify", (req, res) => {
 router.get("/checkStatus/:out_trade_no", (req, res) => {
     const out_trade_no = req.params.out_trade_no;
 
-    getAlif2fInfo().then(data => {
-        const alipay_f2f = new alipayf2f(data);
-        console.log(out_trade_no);
+    order.findOne({
+        out_trade_no
+    }).then(resp => {
+        if (!resp) {
+            res.json({
+                flag: true,
+                message: '订单号不存在'
+            });
+        } else {
+            
+        }
+    })
+});
 
-        alipay_f2f.checkInvoiceStatus(out_trade_no).then(result => {
-            if (result.trade_status == 'TRADE_SUCCESS') {
-                order.findOne({
-                    out_trade_no
-                }).then(resp => {
-                    if (!resp) {
-                        res.json({
-                            flag: true,
-                            message: '订单号不存在'
-                        });
-                    } else {
+// 异步通知支付信息-支付宝当面付或payjs
+router.post('/notify', (req, res) => {
+    order.findOne({out_trade_no: req.body.out_trade_no}).then(data => {
+        switch (data.payType) {
+            case 'alif2f':
+                alif2fCallback(req.body).then(status => {
+                    if(status) {
                         // 先进行订单是否支付判断，如未支付，提取卡密，防止多次提取
-                        if (resp.status == 0) {
+                        if (data.status == 0) {
                             // 提取卡密
-                            goodsCard.find({
-                                listid: resp.listid,
-                                status: 0
-                            }).limit(resp.amount).then(cardsList => {
+                            goodsCard.find({listid: data.listid,status: 0}).limit(data.amount).then(cardsList => {
                                 cardsList.forEach(item => {
                                     item.status = 1;
-                                    item.out_trade_no = resp.out_trade_no;
-                                    item.useTime = resp.payTime;
-                                    item.phone = resp.phone;
+                                    item.out_trade_no = data.out_trade_no;
+                                    item.useTime = data.payTime;
+                                    item.phone = data.phone;
                                     item.save();
                                 })
 
                                 // 修改库存
                                 goodsList.findOne({
-                                    listid: resp.listid
-                                }).then(data => {
+                                    listid: data.listid
+                                }).then(goodlistData => {
                                     goodsCard.count({
-                                        listid: resp.listid,
+                                        listid: data.listid,
                                         status: 0
                                     }).then(stock => {
-                                        data.stock = stock;
-                                        data.save(() => {
-                                            resp.trade_no = result.trade_no;
-                                            resp.payTime = result.send_pay_date;
-                                            resp.status = 1;
-                                            resp.payType = 'alif2f';
-                                            resp.save(() => {
-                                                res.json({
-                                                    flag: true
-                                                });
+                                        goodlistData.stock = stock;
+                                        goodlistData.save(() => {
+                                            data.trade_no = req.body.trade_no;
+                                            data.payTime = req.body.gmt_payment;
+                                            data.status = 1;
+                                            data.save(() => {
+                                                res.status(200).send('success');
                                             });
                                         });
                                     })
                                 })
                             }).catch(err => {
-                                console.log(err)
+                                console.log(err);
+                                res.status(400);
                             })
                         } else {
-                            res.json({
-                                flag: true
-                            });
+                            res.status(400);
                         }
+                    } else {
+                        res.status(400);
                     }
-                })
-            } else {
-                res.json({
-                    flag: false
                 });
-            }
-        }).catch(error => {
-            console.log(error);
-        });
+                break;
+
+            case 'payjs':
+                payjsCallback(req.body).then(status => {
+                    if(status) {
+                        // 先进行订单是否支付判断，如未支付，提取卡密，防止多次提取
+                        if (data.status == 0) {
+                            // 提取卡密
+                            goodsCard.find({listid: data.listid,status: 0}).limit(data.amount).then(cardsList => {
+                                cardsList.forEach(item => {
+                                    item.status = 1;
+                                    item.out_trade_no = data.out_trade_no;
+                                    item.useTime = data.payTime;
+                                    item.phone = data.phone;
+                                    item.save();
+                                })
+
+                                // 修改库存
+                                goodsList.findOne({
+                                    listid: data.listid
+                                }).then(goodlistData => {
+                                    goodsCard.count({
+                                        listid: data.listid,
+                                        status: 0
+                                    }).then(stock => {
+                                        goodlistData.stock = stock;
+                                        goodlistData.save(() => {
+                                            data.trade_no = req.body.trade_no;
+                                            data.payTime = req.body.send_pay_date;
+                                            data.status = 1;
+                                            data.save(() => {
+                                                res.status(200).send('success');
+                                            });
+                                        });
+                                    })
+                                })
+                            }).catch(err => {
+                                console.log(err);
+                                res.status(400);
+                            })
+                        } else {
+                            res.status(400);
+                        }
+                    } else {
+                        res.status(400);
+                    }
+                });
+                break;
+        
+            default:
+                break;
+        }
     });
-});
-
-// 异步通知支付信息-支付宝当面付
-router.post('/notify', (req, res) => {
-    getAlif2fInfo.then(data => {
-        const alipay_f2f = new alipayf2f(data);
-
-        /* 请勿改动支付宝回调过来的post参数, 否则会导致验签失败 */
-        var signStatus = alipay_f2f.verifyCallback(req.body);
-        if (signStatus === false) {
-            return res.error("回调签名验证未通过");
-        }
-
-        /* 商户订单号 */
-        var noInvoice = req.body["out_trade_no"];
-        /* 订单状态 */
-        var invoiceStatus = req.body["trade_status"];
-
-        // 支付宝回调通知有多种状态您可以点击已下链接查看支付宝全部通知状态
-        // https://doc.open.alipay.com/docs/doc.htm?spm=a219a.7386797.0.0.aZMdK2&treeId=193&articleId=103296&docType=1#s1
-        if (invoiceStatus !== "TRADE_SUCCESS") {
-            return res.send("success");
-        }
-    })
 });
 
 // $route GET trade/order
@@ -233,9 +256,7 @@ router.post('/notify', (req, res) => {
 router.get("/:currentPage/:pageSize", passport.authenticate('jwt', {
     session: false
 }), (req, res) => {
-
     dbutils.pageQuery(req.params.currentPage, req.params.pageSize, order, {}, {}, function (err, $data) {
-
         var data = $data.results,
             retData = [];
         data.forEach(element => {
@@ -313,6 +334,52 @@ function getAlif2fInfo() {
             resolve(alipayConfig);
         })
     });
+}
+
+// 支付宝当面付异步通知回调
+function alif2fCallback(postInfo) {
+    return new Promise((resolve, reject) => {
+        getAlif2fInfo().then(data => {
+            const alipay_f2f = new alipayf2f(data);
+            /* 请勿改动支付宝回调过来的post参数, 否则会导致验签失败 */
+            const signStatus = alipay_f2f.verifyCallback(postInfo);
+            if (signStatus === false) {
+                reject(false);
+            }
+    
+            /* 商户订单号 */
+            const noInvoice = postInfo.out_trade_no;
+            /* 订单状态 */
+            const invoiceStatus = postInfo.trade_status;
+    
+            // 支付宝回调通知有多种状态您可以点击已下链接查看支付宝全部通知状态
+            // https://doc.open.alipay.com/docs/doc.htm?spm=a219a.7386797.0.0.aZMdK2&treeId=193&articleId=103296&docType=1#s1
+            if (invoiceStatus === "TRADE_SUCCESS") {
+                resolve(true);
+            } else {
+                resolve(false);
+            }
+    
+            /* 一切都验证好后就能更新数据库里数据说用户已经付钱啦 */
+            // req.database.update(noInvoice, {
+            //     pay: true
+            // }).then(result => res.send("success")).catch(err => res.catch(err));
+        })
+    });
+}
+
+// payjs异步通知回调
+function payjsCallback(postInfo) {
+    return new Promise((resolve, reject) => {
+        if (payjs.notifyCheck(postInfo) == true) {
+            //校验成功
+            resolve(true);
+        } else {
+            //校验失败
+            resolve(false);
+        }
+    });
+    
 }
 
 module.exports = router
